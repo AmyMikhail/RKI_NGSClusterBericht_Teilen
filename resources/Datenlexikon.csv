@@ -1,0 +1,92 @@
+varid,varname_data,varname_english,data_source,varname_code,var_in_script
+1,scount,National reference lab isolate ID,NRZ,isolate_nrzid,TRUE
+2,einsendendes_labor,Submitting laboratory name,NRZ,isolate_submitlab,FALSE
+3,bundesland,Isolate origin - federal state,NRZ,isolate_fedstate,TRUE
+4,landkreis,Isolate origin - county,NRZ,isolate_county,TRUE
+5,pat_geb_jahr,Lab form case birth year,NRZ,isolate_birthyear,TRUE
+6,pat_geb_monat,Lab form case birth month,NRZ,isolate_birthmonth,TRUE
+7,serovar,Serovar as determined by ref lab,NRZ,isolate_serovar,TRUE
+8,edatum,Isolate receipt date,NRZ,isolate_receiptdate,TRUE
+9,einsender_datum,Isolate submission date,NRZ,isolate_submitdate,TRUE
+10,einsender_nr,Submitting lab isolate ID,NRZ,isolate_submitlabid,FALSE
+11,geschlecht,Lab form case sex,NRZ,isolate_sex,TRUE
+12,plz_wohnort,Lab form case residence,NRZ,isolate_residence,FALSE
+13,antibiotikaresistenzprofil_kurz,Antibiotic resistance profile,NRZ,isolate_amrprofile,FALSE
+14,probe_bemerkungen,Isolate remarks from ref lab,NRZ,isolate_remarks,FALSE
+15,ngs_stand,NGS status,NRZ,isolate_ngsstatus,TRUE
+16,ngs_cluster,NGS cluster ID,NRZ,isolate_ngsclusterid,TRUE
+17,hub0,Hub 0,NRZ,isolate_hub0,FALSE
+18,hub1,Hub 1,NRZ,isolate_hub1,FALSE
+19,hub2,Hub 2,NRZ,isolate_hub2,FALSE
+20,hub3,Hub 3,NRZ,isolate_hub3,FALSE
+21,interne_ref,Survnet case ID,Survnet,case_survnetid,TRUE
+22,aktenzeichen,Survnet file number,Survnet,case_fileid,FALSE
+23,melde_landkreis_bundesland,Survnet reporting state,Survnet,case_reportfedstate,TRUE
+24,melde_landkreis,Survnet reporting county,Survnet,case_reportcounty,TRUE
+25,meldedatum_wochenjahr,Survnet notification year,Survnet,case_reportyear,FALSE
+26,meldedatum_woche,Survnet notification week,Survnet,case_reportweek,FALSE
+27,meldedatum,Survnet notification date,Survnet,case_reportdate,TRUE
+28,serovar_surv_net,Survnet serovar,Survnet,case_serovar,FALSE
+29,geburts_jahr_monat_kalenderjahr,Survnet case birth year,Survnet,case_birthyear,FALSE
+30,geburts_jahr_monat_monat,Survnet case birth month,Survnet,case_birthmonth,FALSE
+31,alter_berechnet,Survnet calculated case age,Survnet,case_calculatedage,TRUE
+32,geschlecht_surv_net,Survnet case sex,Survnet,case_sex,TRUE
+33,erkrankungsbeginn,Symptom onset date,Survnet,case_onsetdate,TRUE
+34,erkrankungsbeginn_woche,Symptom onset week,Survnet,case_onsetweek,FALSE
+35,erkrankungsbeginn_wochenjahr,Symptom onset year,Survnet,case_onsetyear,FALSE
+36,hospitalisierung_status,Hospitalisation status,Survnet,case_hospitalisedstatus,TRUE
+37,ex_hosp_reason1,Primary reason for hospitalisation,Survnet,case_hospitalisedreason,TRUE
+38,ex_hosp_stay_from1,Hospital admission date,Survnet,case_hospitaladmitdate,FALSE
+39,ex_hosp_stay_until1,Hospital discharge date,Survnet,case_hospitaldischargedate,FALSE
+40,sal_diagnose_speziell,Salmonellosis complications,Survnet,case_complications,FALSE
+41,verstorben_status,Death status,Survnet,case_deathstatus,TRUE
+42,verstorben_grund,Primary cause of death,Survnet,case_deathcause,TRUE
+43,verstorben_datum,Date of death,Survnet,case_deathdate,FALSE
+44,expositionsland_staat,Country of exposure,Survnet,case_exposurenation,TRUE
+45,exposition_landkreis,County of exposure,Survnet,case_exposurecounty,TRUE
+46,expositionsdatum_von,Exposure start date,Survnet,case_exposurefromdate,FALSE
+47,expositionsdatum_bis,Exposure end date,Survnet,case_exposuretodate,FALSE
+48,ausbruchsangabe_in_surv_net,Survnet outbreak name,Survnet,case_outbreaksurvnetid,FALSE
+49,teil_eines_ausbruchs,Linked to an outbreak,Survnet,case_outbreaklink,TRUE
+50,herd_interne_ref_ubergeordneter_ausbruch_oder_id_im_nrz,Linked to a higher level cluster,Survnet,case_higherlevelclusterlink,FALSE
+51,hub,Hidden formula - ignore,Excel calculation,formula_01,FALSE
+52,kombi_surv_net_lk_wohnort_geb_jahr_geb_monat_geschlecht,Hidden formula - ignore,Excel calculation,formula_02,FALSE
+53,kombi_isolat,Hidden formula - ignore,Excel calculation,formula_03,FALSE
+54,isolat_edatum,Hidden formula - ignore,Excel calculation,formula_04,FALSE
+55,isolat_edatum_jahr,Hidden formula - ignore,Excel calculation,formula_05,FALSE
+56,meldedatum_2,Hidden formula - ignore,Excel calculation,formula_06,FALSE
+57,eb_woche_eb_jahr,Hidden formula - ignore,Excel calculation,formula_07,FALSE
+58,meldewoche_1,Hidden formula - ignore,Excel calculation,formula_08,FALSE
+59,laborwoche_1,Hidden formula - ignore,Excel calculation,formula_09,FALSE
+60,meldewoche_1_meldejahr,Hidden formula - ignore,Excel calculation,formula_10,FALSE
+61,laborwoche_1_laborjahr,Hidden formula - ignore,Excel calculation,formula_11,FALSE
+62,epicurve_zeit_zeiteinheit_fur_epicurve_woche_jahr_erkrankungsbeginn_wenn_nicht_bekannt_meldewoche_1_meldewoche_wenn_nicht_gemeldet_laborwoche_1_laborjahr,Hidden formula - ignore,Excel calculation,formula_12,FALSE
+63,hilfe_epicurve,Hidden formula - ignore,Excel calculation,formula_13,FALSE
+64,auswertung_alter_berechnet_in_surv_net_wenn_nicht_gemeldet_aus_angaben_am_nrz_berechnet,Hidden formula - ignore,Excel calculation,formula_14,FALSE
+65,alter_basierend_auf_nrz_daten,Hidden formula - ignore,Excel calculation,formula_15,FALSE
+66,alter_basierend_auf_nrz_daten_unbekannt,Hidden formula - ignore,Excel calculation,formula_16,FALSE
+67,auswertung_geschlecht_in_surv_net_wenn_nicht_gemeldet_angaben_am_nrz,Hidden formula - ignore,Excel calculation,formula_17,FALSE
+68,auswertung_bundesland_wohnort_basierend_auf_nrz_daten,Hidden formula - ignore,Excel calculation,formula_18,FALSE
+69,auswertung_bundesland_wohnort_melde_bundesland_wenn_nicht_gemeldet_bl_von_isolat,Hidden formula - ignore,Excel calculation,formula_19,FALSE
+70,auswertung_landkreis_wohnort_basierend_auf_nrz_daten,Hidden formula - ignore,Excel calculation,formula_20,FALSE
+71,auswertung_landkreis_wohnort_melde_landkreis_wenn_nicht_gemeldet_landkreis_von_isolat,Hidden formula - ignore,Excel calculation,formula_21,FALSE
+72,auswertung_exposition_land_kontinent,Hidden formula - ignore,Excel calculation,formula_22,FALSE
+73,exposition_bundesland,Hidden formula - ignore,Excel calculation,formula_23,FALSE
+74,exposition_ausland,Hidden formula - ignore,Excel calculation,formula_24,FALSE
+75,auswertung_ngs_kein_isolat_keine_ngs_bezeichung_ngs_cluster,Hidden formula - ignore,Excel calculation,formula_25,FALSE
+76,kombi_hosp_status_grund,Hidden formula - ignore,Excel calculation,formula_26,FALSE
+77,auswertung_hospitalisierung_dauer_d_aufgrund_der_salmonellose_falsch_nicht_ausreichend_daten,Hidden formula - ignore,Excel calculation,formula_27,FALSE
+78,hilfe_hosp_beginn_angegeben_wahr,Hidden formula - ignore,Excel calculation,formula_28,FALSE
+79,hilfe_hosp_ende_angegeben_wahr,Hidden formula - ignore,Excel calculation,formula_29,FALSE
+80,kombi_hosp_datum,Hidden formula - ignore,Excel calculation,formula_30,FALSE
+81,hilfe_pivot_eb_woche,Hidden formula - ignore,Excel calculation,formula_31,FALSE
+82,hilfe_pivot_eb_wochenjahr,Hidden formula - ignore,Excel calculation,formula_32,FALSE
+83,auswertung_fall_status_laut_falldefinition_bestatigter_wahrscheinlicher_moglicher,Case definition,Manually added text,case_definition,TRUE
+84,bemerkungen2,Case remarks,Manually added text,case_remarks,FALSE
+85,explorativ_befragung,Exploratory interview done,Manually added text,case_interviewstatus,FALSE
+86,probenmaterial,Sample material type,Manually added text,case_sampletype,FALSE
+87,salmonellen_symptome,Case symptoms,Manually added text,case_symptoms,FALSE
+88,vorerkrankungen,Case pre-existing conditions,Manually added text,case_comorbidities,FALSE
+89,krankenhausaufenthalt,Hospitalisation additional remarks,Manually added text,case_hospitalisationremarks,FALSE
+90,krankenhaus,Hospital name,Manually added text,case_hospitalname,FALSE
+91,krankenhausinfos,Hospital information,Manually added text,case_hospitalinformation,FALSE

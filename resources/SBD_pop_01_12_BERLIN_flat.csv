@@ -1,0 +1,413 @@
+Bundesland,Stadt- o. Landkreis,Population,Kreiskennziffer
+BB,LK Barnim,182760,12060
+BB,SK Brandenburg a.d.Havel,72124,12051
+BB,SK Cottbus,100219,12052
+BB,LK Dahme-Spreewald,169067,12061
+BB,LK Elbe-Elster,102638,12062
+BB,SK Frankfurt (Oder),57873,12053
+BB,LK Havelland,161909,12063
+BB,LK Märkisch-Oderland,194328,12064
+BB,LK Oberhavel,211249,12065
+BB,LK Oberspreewald-Lausitz,110476,12066
+BB,LK Oder-Spree,178658,12067
+BB,LK Ostprignitz-Ruppin,99078,12068
+BB,SK Potsdam,178089,12054
+BB,LK Potsdam-Mittelmark,214664,12069
+BB,LK Prignitz,76508,12070
+BB,LK Spree-Neiße,114429,12071
+BB,LK Teltow-Fläming,168296,12072
+BB,LK Uckermark,119552,12073
+BE,SK Berlin Charlottenburg-Wilmersdorf,341327,11004
+BE,SK Berlin Friedrichshain-Kreuzberg,289120,11002
+BE,SK Berlin Lichtenberg,290493,11011
+BE,SK Berlin Marzahn-Hellersdorf,268739,11010
+BE,SK Berlin Mitte,383457,11001
+BE,SK Berlin Neukölln,330786,11008
+BE,SK Berlin Pankow,407039,11003
+BE,SK Berlin Reinickendorf,264826,11012
+BE,SK Berlin Spandau,243080,11005
+BE,SK Berlin Steglitz-Zehlendorf,308077,11006
+BE,SK Berlin Tempelhof-Schöneberg,351429,11007
+BE,SK Berlin Treptow-Köpenick,269775,11009
+BW,LK Breisgau-Hochschwarzwald,262795,8315
+BW,LK Emmendingen,165383,8316
+BW,SK Freiburg i.Breisgau,230241,8311
+BW,LK Konstanz,285325,8335
+BW,LK Lörrach,228639,8336
+BW,LK Ortenaukreis,429479,8317
+BW,LK Rottweil,139455,8325
+BW,LK Schwarzwald-Baar-Kreis,212381,8326
+BW,LK Tuttlingen,140152,8327
+BW,LK Waldshut,170619,8337
+BW,SK Baden-Baden,55123,8211
+BW,LK Calw,158397,8235
+BW,LK Enzkreis,198905,8236
+BW,LK Freudenstadt,117935,8237
+BW,SK Heidelberg,160355,8221
+BW,SK Karlsruhe,313092,8212
+BW,LK Karlsruhe,444232,8215
+BW,SK Mannheim,309370,8222
+BW,LK Neckar-Odenwald-Kreis,143535,8225
+BW,SK Pforzheim,125542,8231
+BW,LK Rastatt,231018,8216
+BW,LK Rhein-Neckar-Kreis,547625,8226
+BW,LK Böblingen,391640,8115
+BW,LK Esslingen,533859,8116
+BW,LK Göppingen,257253,8117
+BW,LK Heidenheim,132472,8135
+BW,SK Heilbronn,125960,8121
+BW,LK Heilbronn,343068,8125
+BW,LK Hohenlohekreis,112010,8126
+BW,LK Ludwigsburg,543984,8118
+BW,LK Main-Tauber-Kreis,132321,8128
+BW,LK Ostalbkreis,314002,8136
+BW,LK Rems-Murr-Kreis,426158,8119
+BW,LK Schwäbisch Hall,195861,8127
+BW,SK Stuttgart,634830,8111
+BW,LK Alb-Donau-Kreis,196047,8425
+BW,LK Biberach,199742,8426
+BW,LK Bodenseekreis,216227,8435
+BW,LK Ravensburg,284285,8436
+BW,LK Reutlingen,286748,8415
+BW,LK Sigmaringen,130873,8437
+BW,LK Tübingen,227331,8416
+BW,SK Ulm,126329,8421
+BW,LK Zollernalbkreis,188935,8417
+BY,SK Ansbach,41847,9561
+BY,LK Ansbach,183949,9571
+BY,SK Erlangen,111962,9562
+BY,LK Erlangen-Höchstadt,136271,9572
+BY,SK Fürth,127748,9563
+BY,LK Fürth,117387,9573
+BY,LK Neustadt/Aisch-Bad Windsheim,100364,9575
+BY,SK Nürnberg,518365,9564
+BY,LK Nürnberger Land,170365,9574
+BY,LK Roth,126958,9576
+BY,SK Schwabach,40792,9565
+BY,LK Weißenburg-Gunzenhausen,94393,9577
+BY,LK Deggendorf,119326,9271
+BY,LK Dingolfing-Landau,96217,9279
+BY,LK Freyung-Grafenau,78355,9272
+BY,LK Kelheim,122258,9273
+BY,SK Landshut,72404,9261
+BY,LK Landshut,158698,9274
+BY,SK Passau,52469,9262
+BY,LK Passau,192043,9275
+BY,LK Regen,77656,9276
+BY,LK Rottal-Inn,120659,9277
+BY,SK Straubing,47794,9263
+BY,LK Straubing-Bogen,100649,9278
+BY,LK Altötting,111210,9171
+BY,LK Bad Tölz-Wolfratshausen,127227,9173
+BY,LK Berchtesgadener Land,105722,9172
+BY,LK Dachau,153884,9174
+BY,LK Ebersberg,142142,9175
+BY,LK Eichstätt,132341,9176
+BY,LK Erding,137660,9177
+BY,LK Freising,179116,9178
+BY,LK Fürstenfeldbruck,219320,9179
+BY,LK Garmisch-Partenkirchen,88467,9180
+BY,SK Ingolstadt,136981,9161
+BY,LK Landsberg a.Lech,120071,9181
+BY,LK Miesbach,99726,9182
+BY,LK Mühldorf a.Inn,115250,9183
+BY,SK München,1471508,9162
+BY,LK München,348871,9184
+BY,LK Neuburg-Schrobenhausen,96680,9185
+BY,LK Pfaffenhofen a.d.Ilm,127151,9186
+BY,SK Rosenheim,63324,9163
+BY,LK Rosenheim,260983,9187
+BY,LK Starnberg,136092,9188
+BY,LK Traunstein,177089,9189
+BY,LK Weilheim-Schongau,135348,9190
+BY,SK Bamberg,77592,9461
+BY,LK Bamberg,147086,9471
+BY,SK Bayreuth,74657,9462
+BY,LK Bayreuth,103656,9472
+BY,SK Coburg,41249,9463
+BY,LK Coburg,86906,9473
+BY,LK Forchheim,116099,9474
+BY,SK Hof,45930,9464
+BY,LK Hof,95311,9475
+BY,LK Kronach,67135,9476
+BY,LK Kulmbach,71845,9477
+BY,LK Lichtenfels,66838,9478
+BY,LK Wunsiedel i.Fichtelgebirge,73178,9479
+BY,SK Amberg,41970,9361
+BY,LK Amberg-Sulzbach,103109,9371
+BY,LK Cham,127882,9372
+BY,LK Neumarkt i.d.OPf.,133561,9373
+BY,LK Neustadt a.d.Waldnaab,94352,9374
+BY,SK Regensburg,152610,9362
+BY,LK Regensburg,193572,9375
+BY,LK Schwandorf,147189,9376
+BY,LK Tirschenreuth,72504,9377
+BY,SK Weiden i.d.OPf.,42520,9363
+BY,LK Aichach-Friedberg,133596,9771
+BY,SK Augsburg,295135,9761
+BY,LK Augsburg,251534,9772
+BY,LK Dillingen a.d.Donau,96021,9773
+BY,LK Donau-Ries,133496,9779
+BY,LK Günzburg,125747,9774
+BY,SK Kaufbeuren,43893,9762
+BY,SK Kempten,68907,9763
+BY,LK Lindau,81669,9776
+BY,SK Memmingen,43837,9764
+BY,LK Neu-Ulm,174200,9775
+BY,LK Oberallgäu,155362,9780
+BY,LK Ostallgäu,140316,9777
+BY,LK Unterallgäu,144041,9778
+BY,SK Aschaffenburg,70527,9661
+BY,LK Aschaffenburg,174208,9671
+BY,LK Bad Kissingen,103218,9672
+BY,LK Haßberge,84599,9674
+BY,LK Kitzingen,90909,9675
+BY,LK Main-Spessart,126365,9677
+BY,LK Miltenberg,128756,9676
+BY,LK Rhön-Grabfeld,79690,9673
+BY,SK Schweinfurt,54032,9662
+BY,LK Schweinfurt,115106,9678
+BY,SK Würzburg,127880,9663
+BY,LK Würzburg,161834,9679
+HB,SK Bremen,569352,4011
+HB,SK Bremerhaven,113634,4012
+HE,LK Bergstraße,269694,6431
+HE,SK Darmstadt,159207,6411
+HE,LK Darmstadt-Dieburg,297399,6432
+HE,SK Frankfurt am Main,753056,6412
+HE,LK Groß-Gerau,274526,6433
+HE,LK Hochtaunuskreis,236564,6434
+HE,LK Main-Kinzig-Kreis,418950,6435
+HE,LK Main-Taunus-Kreis,237735,6436
+HE,LK Odenwaldkreis,96798,6437
+HE,SK Offenbach,128744,6413
+HE,LK Offenbach,354092,6438
+HE,LK Rheingau-Taunus-Kreis,187157,6439
+HE,LK Wetteraukreis,306460,6440
+HE,SK Wiesbaden,278342,6414
+HE,LK Gießen,268876,6531
+HE,LK Lahn-Dill-Kreis,253777,6532
+HE,LK Limburg-Weilburg,172083,6533
+HE,LK Marburg-Biedenkopf,246648,6534
+HE,LK Vogelsbergkreis,105878,6535
+HE,LK Fulda,222584,6631
+HE,LK Hersfeld-Rotenburg,120829,6632
+HE,SK Kassel,201585,6611
+HE,LK Kassel,236633,6633
+HE,LK Schwalm-Eder-Kreis,180222,6634
+HE,LK Waldeck-Frankenberg,156953,6635
+HE,LK Werra-Meißner-Kreis,101017,6636
+HH,SK Hamburg,1841179,2000
+MV,LK Ludwigslust–Parchim,212618,13076
+MV,LK Mecklenburgische Seenplatte,259130,13071
+MV,LK Nordwestmecklenburg,156729,13074
+MV,SK Rostock,208886,13003
+MV,LK Rostock,215113,13072
+MV,SK Schwerin,95818,13004
+MV,LK Vorpommern–Greifswald,236697,13075
+MV,LK Vorpommern–Rügen,224684,13073
+NI,SK Braunschweig,248292,3101
+NI,LK Gifhorn,175920,3151
+NI,LK Goslar,137014,3153
+NI,LK Göttingen,328074,3159
+NI,LK Helmstedt,91307,3154
+NI,LK Northeim,132765,3155
+NI,LK Peine,133965,3157
+NI,SK Salzgitter,104948,3102
+NI,LK Wolfenbüttel,119960,3158
+NI,SK Wolfsburg,124151,3103
+NI,LK Diepholz,216886,3251
+NI,LK Hameln-Pyrmont,148559,3252
+NI,Region Hannover,1157624,3241
+NI,LK Hildesheim,276594,3254
+NI,LK Holzminden,70975,3255
+NI,LK Nienburg (Weser),121386,3256
+NI,LK Schaumburg,157781,3257
+NI,LK Celle,178936,3351
+NI,LK Cuxhaven,198213,3352
+NI,LK Harburg,252776,3353
+NI,LK Heidekreis,139755,3358
+NI,LK Lüchow-Dannenberg,48424,3354
+NI,LK Lüneburg,183372,3355
+NI,LK Osterholz,113517,3356
+NI,LK Rotenburg (Wümme),163455,3357
+NI,LK Stade,203102,3359
+NI,LK Uelzen,92572,3360
+NI,LK Verden,136792,3361
+NI,LK Ammerland,124071,3451
+NI,LK Aurich,189848,3452
+NI,LK Cloppenburg,169348,3453
+NI,SK Delmenhorst,77607,3401
+NI,SK Emden,50195,3402
+NI,LK Emsland,325657,3454
+NI,LK Friesland,98460,3455
+NI,LK Grafschaft Bentheim,136511,3456
+NI,LK Leer,169809,3457
+NI,SK Oldenburg,168210,3403
+NI,LK Oldenburg,130144,3458
+NI,SK Osnabrück,164748,3404
+NI,LK Osnabrück,357343,3459
+NI,LK Vechta,141598,3460
+NI,LK Wesermarsch,88624,3461
+NI,SK Wilhelmshaven,76278,3405
+NI,LK Wittmund,56882,3462
+NW,SK Bochum,364628,5911
+NW,SK Dortmund,587010,5913
+NW,LK Ennepe-Ruhr-Kreis,324296,5954
+NW,SK Hagen,188814,5914
+NW,SK Hamm,179111,5915
+NW,SK Herne,156374,5916
+NW,LK Hochsauerlandkreis,260475,5958
+NW,LK Märkischer Kreis,412120,5962
+NW,LK Olpe,134775,5966
+NW,LK Siegen-Wittgenstein,278210,5970
+NW,LK Soest,301902,5974
+NW,LK Unna,394782,5978
+NW,SK Bielefeld,333786,5711
+NW,LK Gütersloh,364083,5754
+NW,LK Herford,250783,5758
+NW,LK Höxter,140667,5762
+NW,LK Lippe,348391,5766
+NW,LK Minden-Lübbecke,310710,5770
+NW,LK Paderborn,306890,5774
+NW,SK Duisburg,498590,5112
+NW,SK Düsseldorf,619294,5111
+NW,SK Essen,583109,5113
+NW,LK Kleve,310974,5154
+NW,SK Krefeld,227020,5114
+NW,LK Mettmann,485684,5158
+NW,SK Mönchengladbach,261454,5116
+NW,SK Mülheim a.d.Ruhr,170880,5117
+NW,SK Oberhausen,210829,5119
+NW,SK Remscheid,110994,5120
+NW,LK Rhein-Kreis Neuss,451007,5162
+NW,SK Solingen,159360,5122
+NW,LK Viersen,298935,5166
+NW,LK Wesel,459809,5170
+NW,SK Wuppertal,354382,5124
+NW,StädteRegion Aachen,555465,5334
+NW,SK Bonn,327258,5314
+NW,LK Düren,263722,5358
+NW,LK Euskirchen,192840,5366
+NW,LK Heinsberg,254322,5370
+NW,SK Köln,1085664,5315
+NW,SK Leverkusen,163838,5316
+NW,LK Oberbergischer Kreis,272471,5374
+NW,LK Rhein-Erft-Kreis,470089,5362
+NW,LK Rheinisch-Bergischer Kreis,283455,5378
+NW,LK Rhein-Sieg-Kreis,599780,5382
+NW,LK Borken,370676,5554
+NW,SK Bottrop,117383,5512
+NW,LK Coesfeld,219929,5558
+NW,SK Gelsenkirchen,260654,5513
+NW,SK Münster,314319,5515
+NW,LK Recklinghausen,615261,5562
+NW,LK Steinfurt,447614,5566
+NW,LK Warendorf,277783,5570
+RP,LK Ahrweiler,129727,7131
+RP,LK Altenkirchen,128705,7132
+RP,LK Bad Kreuznach,158080,7133
+RP,LK Birkenfeld,80720,7134
+RP,LK Cochem-Zell,61587,7135
+RP,SK Koblenz,114024,7111
+RP,LK Mayen-Koblenz,214259,7137
+RP,LK Neuwied,181941,7138
+RP,LK Rhein-Hunsrück-Kreis,102937,7140
+RP,LK Rhein-Lahn-Kreis,122308,7141
+RP,LK Westerwaldkreis,201597,7143
+RP,LK Alzey-Worms,129244,7331
+RP,LK Bad Dürkheim,132660,7332
+RP,LK Donnersbergkreis,75101,7333
+RP,SK Frankenthal,48561,7311
+RP,LK Germersheim,129075,7334
+RP,SK Kaiserslautern,99845,7312
+RP,LK Kaiserslautern,106057,7335
+RP,LK Kusel,70526,7336
+RP,SK Landau i.d.Pfalz,46677,7313
+RP,SK Ludwigshafen,171061,7314
+RP,SK Mainz,217118,7315
+RP,LK Mainz-Bingen,210889,7339
+RP,SK Neustadt a.d.Weinstraße,53148,7316
+RP,SK Pirmasens,40403,7317
+RP,LK Rhein-Pfalz-Kreis,154201,7338
+RP,SK Speyer,50378,7318
+RP,LK Südliche Weinstraße,110356,7337
+RP,LK Südwestpfalz,95113,7340
+RP,SK Worms,83330,7319
+RP,SK Zweibrücken,34209,7320
+RP,LK Bernkastel-Wittlich,112262,7231
+RP,LK Bitburg-Prüm,98561,7232
+RP,SK Trier,110636,7211
+RP,LK Trier-Saarburg,148945,7235
+RP,LK Vulkaneifel,60603,7233
+SH,LK Dithmarschen,133210,1051
+SH,SK Flensburg,89504,1001
+SH,LK Herzogtum Lauenburg,197264,1053
+SH,SK Kiel,247548,1002
+SH,SK Lübeck,217198,1003
+SH,SK Neumünster,79487,1004
+SH,LK Nordfriesland,165507,1054
+SH,LK Ostholstein,200581,1055
+SH,LK Pinneberg,314391,1056
+SH,LK Plön,128647,1057
+SH,LK Rendsburg-Eckernförde,272775,1058
+SH,LK Schleswig-Flensburg,200025,1059
+SH,LK Segeberg,276032,1060
+SH,LK Steinburg,131347,1061
+SH,LK Stormarn,243196,1062
+SL,LK Merzig-Wadern,103366,10042
+SL,LK Neunkirchen,132206,10043
+SL,LK Saarlouis,195201,10044
+SL,LK Saar-Pfalz-Kreis,142631,10045
+SL,LK Sankt Wendel,87397,10046
+SL,LK Stadtverband Saarbrücken,329708,10041
+SN,SK Chemnitz,247237,14511
+SN,LK Erzgebirgskreis,337696,14521
+SN,LK Mittelsachsen,306185,14522
+SN,LK Vogtlandkreis,227796,14523
+SN,LK Zwickau,317531,14524
+SN,LK Bautzen,300880,14625
+SN,SK Dresden,554649,14612
+SN,LK Görlitz,254894,14626
+SN,LK Meißen,242165,14627
+SN,LK Sächsische Schweiz-Osterzgebirge,245611,14628
+SN,SK Leipzig,587857,14713
+SN,LK Leipzig,257763,14729
+SN,LK Nordsachsen,197673,14730
+ST,LK Altmarkkreis Salzwedel,83765,15081
+ST,LK Anhalt-Bitterfeld,159854,15082
+ST,LK Börde,171734,15083
+ST,LK Burgenlandkreis,180190,15084
+ST,SK Dessau-Roßlau,81237,15001
+ST,SK Halle,239257,15002
+ST,LK Harz,214446,15085
+ST,LK Jerichower Land,89928,15086
+ST,SK Magdeburg,238697,15003
+ST,LK Mansfeld-Südharz,136249,15087
+ST,LK Saalekreis,184582,15088
+ST,LK Salzlandkreis,190560,15089
+ST,LK Stendal,111982,15090
+ST,LK Wittenberg,125840,15091
+TH,LK Altenburger Land,90118,16077
+TH,LK Eichsfeld,100380,16061
+TH,SK Eisenach,42370,16056
+TH,SK Erfurt,213699,16051
+TH,SK Gera,94152,16052
+TH,LK Gotha,135452,16067
+TH,LK Greiz,98159,16076
+TH,LK Hildburghausen,63553,16069
+TH,LK Ilm-Kreis,108742,16070
+TH,SK Jena,111407,16053
+TH,LK Kyffhäuserkreis,75009,16065
+TH,LK Nordhausen,83822,16062
+TH,LK Saale-Holzland-Kreis,83051,16074
+TH,LK Saale-Orla-Kreis,80868,16075
+TH,LK Saalfeld-Rudolstadt,106356,16073
+TH,LK Schmalkalden-Meiningen,122347,16066
+TH,LK Sömmerda,69655,16068
+TH,LK Sonneberg,56196,16072
+TH,SK Suhl,34835,16054
+TH,LK Unstrut-Hainich-Kreis,102912,16064
+TH,LK Wartburgkreis,123025,16063
+TH,SK Weimar,65090,16055
+TH,LK Weimarer Land,81947,16071

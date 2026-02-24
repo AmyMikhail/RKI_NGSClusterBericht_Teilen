@@ -1,0 +1,2898 @@
+---
+title: "Salmonellen NGS-Cluster/Ausbruch Zusammenfassung"
+date: "`r format(Sys.Date(), format = '<br/>Berichtsstand %d.%m.%Y')`"
+lang: de-DE
+params:
+  author_name:
+    label: "Name des Autors:"
+    value: "Ihr Name"
+    input: text
+  author_affiliation:
+    label: "Zugehörigkeit des Autors:"
+    value: "Abteilung für Infektionsepidemiologie, Robert Koch-Institut"
+    input: text
+  outbreak_declared:
+    label: "Wurde dieser Cluster zu einem Ausbruch erklärt?"
+    value: TRUE
+    input: checkbox
+  previous_report:
+    label: "Vergleich mit früherem Bericht?"
+    value: FALSE
+    input: checkbox
+  example_data:
+    label: "Testbericht mit Beispieldaten?"
+    value: TRUE
+    input: checkbox
+  data_password: 
+    label: "Datenkennwort:"
+    value: ""
+    input: password
+  data_current:
+    label: "Aktuelle Zeilenliste auswählen:"
+    value: "data/ll_current.rds.enc"
+    input: file
+  data_previous:
+    label: "Vorherige Zeilenliste auswählenn:"
+    value: "data/ll_previous.rds.enc"
+    input: file
+  map_breaks:
+    label: "Wählen Sie die Bruchmethode für die Choroplethenkarte:"
+    value: fisher
+    input: select
+    choices: [fisher, geom, jenks, quantile, sd, pretty]
+  lag_casedate:
+    label: "Verzögerung (Wochen) für das Datum der Fallmeldung:"
+    value: 1
+    input: numeric
+  lag_labdate:
+    label: "Verzögerung (Wochen) für das Eingangsdatum der Probe:"
+    value: 1
+    input: numeric
+  stratifier:
+    label: "Stratifikator für Epikurven auswählen:"
+    value: Bundesland
+    input: radio
+    choices: [Bundesland, Falldefinition]
+output: 
+  officedown::rdocx_document:
+    reference_docx: "resources/vorlagendokument.docx"
+    pandoc_args:
+      - '--lua-filter=merge-code-blocks.lua'
+    page_margins:
+      bottom: 2.5
+      top: 2.5
+      right: 1.5
+      left: 1.5
+      header: 1
+      footer: 1
+      gutter: 0.5
+    tables:
+      style: Table
+      layout: autofit
+      width: 1.0
+      caption:
+       style: Table Caption
+       pre: 'Tabelle '
+       sep: ': '
+    plots:
+      style: Figure
+      align: left
+      topcaption: FALSE
+      caption:
+       style: Image Caption
+       pre: 'Abb. '
+       sep: ': '
+urlcolor: blue
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE, purl=FALSE}
+
+### Store width of page between margins in Microsoft Word template:
+
+# Check width of page by opening vorlagendokument.docx and switching the ruler on
+# Width of page between the margins in the word document (in centimeters)
+pagewidth_cm <- 18
+
+# Width of page converted to inches:
+pagewidth_in <- pagewidth_cm * 0.3937 
+
+
+# Set chunk options:
+knitr::opts_chunk$set(echo = FALSE, 
+                      message = FALSE, 
+                      warning = FALSE, 
+                      eval = TRUE,
+                      ft.align = "left",
+                      fig.width = pagewidth_in,
+                      fig.height = 4.5,
+                      out.width = "100%")
+
+# Check if pacman is installed, install if not:
+if (!require("pacman")) install.packages("pacman")
+
+# Install packages required to build the r markdown report:
+pacman::p_load(
+  rmarkdown,
+  knitr, 
+  shiny,
+  bookdown,
+  officedown,
+  officer
+)
+
+# Add option to conditionally show text and evaluate inline expressions:
+knit_engines$set(asis = function(options) {
+  if (options$echo && options$eval) knit_child(text = options$code)
+})
+
+
+```
+
+
+
+```{r load_libraries}
+
+
+# Use pacman::p_load_gh to load required GitHub packages:
+pacman::p_load_gh(
+
+  # Works with sf package to improve positioning of labels on maps:
+  "yutannihilation/ggsflabel"
+
+  )
+
+# Use pacman::p_load to load required CRAN packages:
+pacman::p_load(
+  
+  # Packages that make importing and exporting files and objects easier:
+  here, 
+  rio,
+  safer,
+  janitor,
+  
+  # Packages for creating nicely formatted summary tables:
+  flextable,
+  ftExtra,
+  ztable,
+  gtsummary, 
+  
+  # Add-on functions for ggplot graphics
+  gridExtra,
+  ggrepel,
+  ggtext,
+  scales, 
+  
+  # Packages for making geographic maps:
+  sf, 
+  mapsf,
+  ggmap,
+  
+  # Packages containing epidemiological functions:
+  epikit, 
+  apyramid, 
+  
+  # Loads suite of essential 'tidyverse' packages including: 
+  # dplyr, tidyr, lubridate, stringr, ggplot2, forcats, purrr, tibble & readr
+  tidyverse
+
+  )
+
+
+```
+
+
+```{r load_functions}
+
+# For now the functions developed for this report are sourced individually here.
+# Later they will be loaded as part of the package that contains the shiny app.
+
+# Source function to calculate the year and week from a date:
+source(here("functions", "get_yearweek.R"))
+
+# Source function to calculate the year and month from a date:
+source(here("functions", "get_yearmonth.R"))
+
+# Source function to convert tables of numeric values to heatmap tables:
+source(here("functions", "heatmaptable.R"))
+
+# Source function to make calendar weeks or months human readable:
+source(here("functions", "print_dateunit.R"))
+
+# Source function to clean raw line list data:
+source(here("functions", "clean_data.R"))
+
+# Source function to calculate numbers and statements for executive summary:
+source(here("functions", "execsum.R"))
+
+# Source function to compare bundesland numbers and statements:
+source(here("functions", "compare_bundesland.R"))
+
+# Source function to compare values from old and new line lists:
+source(here("functions", "compare_table.R"))
+
+# Source function to emphasize text with blue colour and bold font:
+source(here("functions", "colourtext.R"))
+
+# Source function to calculate and label incidence breaks for map:
+source(here("functions", "ibreak_labeller.R"))
+
+# Source function to format epicurve with a double date x axis:
+source(here("functions", "label_date_axis.R"))
+
+# Source function to format bottom axis of age-sex pyramid with whole integers:
+source(here("functions", "integer_breaks.R"))
+
+```
+
+
+```{r set_language}
+
+# Set the language to German:
+invisible(capture.output(Sys.setlocale("LC_ALL", "de_DE.UTF-8")))
+
+### Note: wrapped in invisible(capture.output()) to suppress info message.
+### Suppressing messages does not work for this as it is categorized as info.
+
+```
+
+
+```{r font_styles}
+
+# Set flextable default fonts:
+set_flextable_defaults(font.family = "Calibri", 
+                       cs.family = "Calibri", 
+                       hansi.family = "Calibri", 
+                       eastasia.family = "Calibri", 
+                       decimal.mark = ",", 
+                       big.mark = ".")
+
+
+# Create normal paragraph style:
+nstyle <- officer::fp_text(color = "black", 
+                           bold = FALSE, 
+                           font.size = 10, 
+                           font.family = "Calibri")
+
+# Create highlight text style:
+hstyle <- officer::fp_text(color = "#4F81BD", 
+                           bold = TRUE, 
+                           font.size = 10, 
+                           font.family = "Calibri", 
+                           shading.color = "#C6D9F1")
+
+# Create a style for section headers that should not appear in the TOC:
+nontoc_header <- officer::fp_text(
+  color = "#4F81BD", 
+  font.size = 16, 
+  font.family = "Calibri",
+  bold = TRUE
+)
+
+# Create style for summary text sub-headings:
+abstract_header <- officer::fp_text(
+  color = "black", 
+  font.size = 12,
+  font.family = "Calibri",
+  bold = TRUE
+)
+
+# Create a style for placehoders for where to add manual text:
+placeholder <- officer::fp_text(
+  color = "darkgrey",
+  font.size = 10,
+  font.family = "Calibri"
+)
+
+# Set flextable defaults:
+set_flextable_defaults(
+  font.family = "Calibri", 
+  font.size = 12
+  )
+
+```
+
+
+
+```{r locate_linelists}
+
+if (params$example_data) {
+  
+  # Create temporary file placeholder to hold raw bytes:
+  tmp_current <- tempfile(fileext = ".xlsx")
+  tmp_previous <- tempfile(fileext = ".xlsx")
+  
+  # Decrypt current line list file into raw byttes in R memory:
+  raw_current <- safer::decrypt_file(
+    infile = params$data_current, 
+    key = params$data_password,
+    outfile = tmp_current
+    )
+  
+  # Decrypt previous line list file into raw bytes in R memory:
+  raw_previous <- safer::decrypt_file(
+    infile = params$data_previous,
+    key = params$data_password,
+    outfile = tmp_previous
+    )
+
+} else {
+  
+  # Otherwise just pass the relative file paths to location names:
+  tmp_current <- params$data_current
+  tmp_previous <- params$data_previous
+  
+}
+
+
+```
+
+
+
+```{r import_colour_codes}
+
+# Import the colour codes to be applied to federal states (Bundesland):
+farbcode <- rio::import(here("resources", "BL Farbcode.xlsx")) %>% 
+  
+  # Add the Hex codes for each colour in a new column:
+  mutate(hexcode = rgb(red = R, 
+                       green = G, 
+                       blue = B,
+                       maxColorValue = 255))
+
+# Create key to check that assigned colours are correct:
+farbcode_key <- ggplot(farbcode, aes(x = Bundesland, 
+                                     y = 1, 
+                                     fill = hexcode)) +
+  geom_tile() +
+  geom_text(aes(label = Code)) +
+  scale_fill_identity() +
+  coord_flip() +
+  scale_x_discrete(limits = rev) +
+  theme(axis.title = element_blank(),
+        axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank())
+
+```
+
+
+```{r import_population}
+
+#########################################################
+# Import population data for federal states (bundesland):
+
+# Import data:
+pop_bundesland <- rio::import(here("resources",
+                                   "SBD_pop_12411_0010_DLAND_flat.csv"),
+                              encoding = "Latin-1") %>% 
+  
+  # Clean up column names:
+  janitor::clean_names() %>% 
+  
+  # Rename columns:
+  rename(pop_date = "time", 
+         admin_level_name = "x1_variable_code", 
+         admin_level_type = "x1_variable_label", 
+         bundesland_numcode = "x1_variable_code_2", 
+         bundesland_name = "x1_variable_code_3", 
+         bundesland_pop = "bevstd_population_number") %>% 
+  
+  # Filter for latest population figures only:
+  filter(pop_date == max(pop_date, na.rm = TRUE)) %>% 
+  
+  # Pad bundesland code with leading 0s so that all are 2 characters long:
+  mutate(bundesland_numcode = stringr::str_pad(string = bundesland_numcode, 
+                                               width = 2, 
+                                               side = "left", 
+                                               pad = "0")) %>% 
+  
+  # Left-join the two-letter codes from farbcode:
+  left_join(farbcode %>% select(Bundesland, Code, hexcode), 
+            by = join_by(bundesland_name == Bundesland)) %>% 
+  
+  # Rename column with two-letter code:
+  rename(bundesland_lettercode = "Code") %>% 
+
+
+  # Select only necessary columns:
+  select(bundesland_numcode,
+         bundesland_lettercode,
+         bundesland_name,
+         hexcode,
+         bundesland_pop)
+
+  
+#########################################################
+# Import population data for counties (kreise):
+
+# Import data:
+pop_kreise <- rio::import(here("resources", 
+                               "SBD_pop_12411_0015_KREISE_flat.csv"), 
+                          encoding = "Latin-1") %>% 
+  
+  # Clean up column names:
+  janitor::clean_names() %>% 
+  
+  # Rename columns:
+  rename(pop_date = "time", 
+         admin_level_name = "x1_variable_code", 
+         admin_level_type = "x1_variable_label", 
+         kreise_code = "x1_variable_code_2", 
+         kreise_name_type = "x1_variable_code_3", 
+         kreise_pop = "bevstd_population_number") %>% 
+  
+  # Filter for latest population figures only:
+  filter(pop_date == max(pop_date, na.rm = TRUE)) %>% 
+  
+  # Separate district name and type into two columns:
+  separate_wider_delim(cols = kreise_name_type, 
+                       delim = ", ", 
+                       names = c("kreise_name", "kreise_type"), 
+                       too_few = "align_start") %>% 
+  
+  # Replace - with NA:
+  mutate(kreise_pop = na_if(kreise_pop, "-")) %>% 
+  
+  # Filter out old divisions that are no longer included 
+  # (Marked by expiry date that starts with 'until(date)' or 'b.date'):
+  filter(grepl("\\(until|\\(b.", x = kreise_name) == FALSE 
+         & grepl("\\(until|\\(b.", x = kreise_type) == FALSE) %>% 
+  
+  # Pad district code with leading 0s so that all are 5 characters long:
+  mutate(kreise_code = stringr::str_pad(string = kreise_code, 
+                                        width = 5, 
+                                        side = "left", 
+                                        pad = "0")) %>% 
+  
+  # Select only code and population:
+  dplyr::select(kreise_code, 
+                kreise_name, 
+                kreise_type, 
+                kreise_pop)
+
+###############################################################
+# Import population data for Berlin sub-districts:
+
+# Import bundesland two-letter codes and population for Berlin sub-districts:
+pop_berlin <- rio::import(here("resources", 
+                               "SBD_pop_01_12_BERLIN_flat.csv"))
+
+# Fix encoding of county names:
+Encoding(pop_berlin$`Stadt- o. Landkreis`) <- "latin1"
+
+# Complete preparation of data:
+pop_berlin <- pop_berlin %>% 
+
+  # Clean column names:
+  janitor::clean_names() %>% 
+  
+  # Select just the columns for the lookup:
+  dplyr::select(bundesland, 
+                stadt_o_landkreis, 
+                kreiskennziffer, 
+                population) %>% 
+  
+  # Rename to match final county column in line list:
+  rename(bundesland_lettercode = bundesland, 
+         area_name = stadt_o_landkreis, 
+         area_code = kreiskennziffer,
+         area_pop = population) %>% 
+  
+  # Pad area codes so that all are 5 characters long:
+  mutate(area_code = stringr::str_pad(string = area_code,
+                                      width = 5, 
+                                      side = "left", 
+                                      pad = "0"))
+
+```
+
+
+
+```{r import_shapefiles}
+
+#####################################################
+# Import shape files for bundesland (federal states):
+
+# Suppress output from R markdown:
+invisible(
+  capture.output(
+    
+    # Import shapefiles for bundesland (federal states):
+    sf_bundesland <- sf::st_read(dsn = here::here("resources", 
+                                            "shapefiles", 
+                                            "vg2500_bld.shp"))
+  )
+)
+
+# Correct formatting of German accents:
+Encoding(sf_bundesland$GEN) <- "latin1" 
+ 
+# Complete shapefile prep:
+sf_bundesland <- sf_bundesland %>% 
+  
+  # Clean column names:
+  janitor::clean_names() %>% 
+   
+  # Rename key variables:
+  rename(bundesland_numcode = "rs", 
+         bundesland_name = "gen") %>% 
+  
+  # Add population data:
+  left_join(pop_bundesland %>% select(-bundesland_name)) %>% 
+  
+  # Remove unnecessary columns:
+  select(-use, -rs_alt) %>% 
+  
+  # Relocate lettercode:
+  relocate(bundesland_lettercode, .after = bundesland_numcode)
+
+
+###########################################################
+# Import shape files for kreise (administrative districts):
+
+# Suppress output from R markdown:
+invisible(
+  capture.output(
+    
+    # Import Kreise shape files:
+    sf_kreise <- sf::st_read(dsn = here::here("resources",
+                                        "shapefiles", 
+                                        "vg2500_krs.shp"))
+  )
+)
+
+# Correct formatting of German accents:
+Encoding(sf_kreise$GEN) <- "latin1" 
+ 
+# Complete shapefile prep:
+sf_kreise <- sf_kreise %>% 
+  
+  # Clean column names:
+  janitor::clean_names() %>% 
+  
+  # Rename key variables:
+  rename(kreise_code = "rs",
+         kreise_name = "gen") %>%
+  
+  # Recode incorrect code for Gottingen (03152 -> 03159):
+  mutate(kreise_code = ifelse(test = kreise_code == "03152",
+                              yes = "03159", 
+                              no = kreise_code)) %>% 
+  
+  # Add population data:
+  left_join(pop_kreise %>% select(kreise_code, kreise_pop)) %>% 
+  
+  # Add missing population for Eisenach (16056):
+  mutate(kreise_pop = ifelse(kreise_code == "16056", 
+                             pop_berlin %>% 
+                               filter(area_code == "16056") %>%
+                               pull(area_pop), 
+                             kreise_pop)) %>% 
+  
+  # Remove unnecessary columns:
+  select(-use, -rs_alt)
+
+# Population missing for Kreise 'Osterode am Harz' code 03156
+
+################################################################################
+# Import shape files for Berlin sub-districts:
+
+# Suppress output from R markdown:
+invisible(
+  capture.output(
+    
+    # Import Berlin sub-district shape files:
+    sf_berlin <- sf::st_read(dsn = here::here("resources",
+                                        "shapefiles", 
+                                        "SKLKBerlinBez.shp")) %>% 
+      
+      # Rename key variables:
+      rename(berlin_district_code = "LKID",
+             berlin_district_name = "byLKmeldel") %>%
+      
+      # Filter for only Berlin sub-districts:
+      filter(grepl(pattern = "Berlin", x = berlin_district_name)) %>% 
+      
+      # Select only code and name columns:
+      select(berlin_district_code, berlin_district_name) %>% 
+      
+      # Remove prefix from Berlin district names:
+      mutate(berlin_district_name = gsub(pattern = "^SK Berlin ", 
+                                         replacement = "", 
+                                         x = berlin_district_name)) %>% 
+      
+      # Change Berlin district_code to character:
+      mutate(berlin_district_code = as.character(berlin_district_code)) %>% 
+      
+      # Add population data:
+      left_join(pop_berlin %>% select(area_code, area_pop), 
+                by = join_by(berlin_district_code == area_code)) %>% 
+      
+      # Rename area pop:
+      rename(berlin_district_pop = area_pop) %>% 
+      
+      # Transform to WGS 84 EPSG 4326 (GIS longitude / latitude):
+      # Coordinate reference system must match the other two shapefiles
+      st_transform(crs = st_crs(sf_kreise))
+
+  )
+)
+
+```
+
+
+```{r import_kauffmannwhite}
+
+# Import the Kauffmann-White Salmonella serotype lookup table:
+kw_lookup <- rio::import(here("resources", 
+                              "Kauffmann_White_classification.xlsx")) %>% 
+  
+  clean_names()
+
+```
+
+
+
+```{r import_outbreakname, eval = params$outbreak_declared}
+
+# Import the name of the cluster from the line list:
+outbreakname <- rio::import(tmp_current, 
+                           sheet = "Linelist", 
+                           range = "B1", 
+                           col_names = FALSE) %>% 
+  
+  # Pull the value out of the data.frame:
+  pull()
+
+
+# Update the title of this report:
+
+### Note: updated yaml header is put in the main body (outside chunk) below.
+
+```
+
+
+```{r import_reportdate}
+
+# Import the date of latest updates from the line list:
+latest_update <- rio::import(tmp_current, 
+                             sheet = "Linelist", 
+                             range = "B3", 
+                             col_names = FALSE) %>% 
+  
+  # Pull the value out of the data.frame:
+  pull()
+
+
+# Update the date of this report:
+
+### Note: updated yaml header is put in the main body (outside chunk) below.
+
+```
+
+
+---
+date: "`r format(latest_update, format = '<br/>Berichtsstand %d.%m.%Y')`"
+---
+
+```{r import_outbreakdate, eval = params$outbreak_declared}
+
+############################################################################
+# GET OUTBREAK DECLARATION DATE FROM LINELIST SHEET
+
+# Import the outbreak declaration date:
+outbreak_decdate <- rio::import(tmp_current, 
+                                sheet = "Linelist", 
+                                range = "J1", 
+                                col_names = FALSE) %>% 
+  
+  # Extract the date to a named object:
+  pull()
+
+
+```
+
+
+```{r import_clusterdate}
+
+############################################################################
+# GET CLUSTER NOTIFICATION DATE FROM LINELIST SHEET
+
+
+# Import the cluster notification date:
+cluster_decdate <- rio::import(tmp_current, 
+                               sheet = "Linelist", 
+                               range = "J2", 
+                               col_names = FALSE) %>% 
+  
+  # Extract the date to a named object:
+  pull()
+
+
+```
+
+
+```{r import_data_dictionary}
+
+#####################################################################
+# CREATE LOOKUP TABLE FOR SHORT VARIABLE NAMES
+
+# Import data dictionary / lookup table for shorter variable names:
+dictionary <- rio::import(here("resources", "Datenlexikon.csv")) 
+
+```
+
+
+```{r import_linelist_current}
+
+#####################################################################
+# IMPORT AND CLEAN CURRENT LINELIST
+
+# Import raw linelist:
+linelist <- rio::import(tmp_current, 
+                        sheet = "Linelist", 
+                        skip = 5, 
+                        .name_repair = "minimal") %>% 
+  
+  # Clean the linelist with the function:
+  clean_data()
+
+
+# Note:
+# - In the Shiny app, varname_code will be used to assign short names to the
+# variables required to make this report only (for testing all imported 
+# variables are assigned a short name, including hidden variables).
+# - The short variable names are used in the rest of this r markdown
+# - If you want to check what the short names correspond to, look them up in 
+# the Datenlexikon.csv file which is in the resources folder.
+# - If you add any new variables to the linelist that you want to use in the 
+# report, make sure the cleaned names are first added to Datenlexikon.csv (the 
+# order doesn't matter, they can be added at the end). 
+
+
+```
+
+
+```{r import_linelist_previous, eval = params$previous_report}
+
+#####################################################################
+# OPTIONALLY IMPORT AND CLEAN PREVIOUS LINELIST
+
+# Imported only if params$previous_report == TRUE
+
+# Import line list for previous sitrep:
+linelist_old <- rio::import(tmp_previous, 
+                        sheet = "Linelist", 
+                        skip = 5, 
+                        .name_repair = "minimal") %>% 
+  
+  # Clean the line list with the function:
+  clean_data()
+
+```
+
+
+
+```{r get_outbreak_details}
+
+############################################################################
+# In this section we extract all the info needed for the front page summary
+############################################################################
+
+# The summary text is divided into the following sections:
+############################################################################
+### 01. OVERVIEW:
+
+### --- a. cluster_decdate 
+### --- b. clustername
+### --- c. outbreak_decdate
+### --- d. outbreakname
+
+# a. Format cluster_decdate (WGS cluster NRZ notification date):
+cluster_decdate <- format(cluster_decdate, format = "%d. %B %Y")
+
+
+# b. Extract clustername from linelist:
+clustername <- linelist %>% 
+  
+  filter(!is.na(isolate_ngsclusterid)) %>% 
+  
+  distinct(isolate_ngsclusterid) %>% 
+  
+  stringr::str_flatten_comma(last = " und ", na.rm = TRUE)
+
+
+# c. Format outbreak_decdate if an outbreak has been declared:
+if(params$outbreak_declared){
+  
+  outbreak_decdate <- format(outbreak_decdate, format = "%d. %B %Y")
+  
+}
+
+
+# d. outbreakname:
+# Already defined above
+
+
+############################################################################
+### 02. VALUES THAT REQUIRE CONDITIONAL FORMATTING:
+
+# Use execsum function to calculate values that require conditional formatting:
+currentvals <- execsum(data = linelist, suffix = "current")
+
+# If a previous line list was uploaded, run the execsum function on it too:
+if(params$previous_report == TRUE){
+  
+  previousvals <- execsum(data = linelist_old, suffix = "previous")
+  
+} else {
+  
+  previousvals <- execsum(data = linelist, suffix = "previous")
+  
+}
+
+
+############################################################################
+### 03. CREATE COMPARISON TABLE FOR FORMATTING:
+
+# Compare bundesland in current and previous line lists:
+if(params$previous_report == TRUE){
+  
+  bundeslist <- compare_bundesland(current = linelist, 
+                                   previous = linelist_old)
+  
+} else {
+  
+  bundeslist <- compare_bundesland(current = linelist, 
+                                   previous = linelist)
+  
+}
+
+
+# Create the compare table:
+compare <- compare_table(current = currentvals,
+                         previous = previousvals, 
+                         bundeslist = bundeslist) %>% 
+  
+  # Ensure latest update date always gets formatted:
+  mutate(change = if_else(name == "latest_update", 
+                          TRUE, 
+                          change))
+
+
+############################################################################
+### 04. EXTRACT NUMBERS FOR EACH CASE DEFINITION:
+
+# Get n_confirmed from compare table:
+n_confirmed <- compare %>% 
+  filter(name == "n_confirmed") %>% 
+  select(value_current) %>% 
+  pull() %>% 
+  as.numeric()
+
+# Create condition to show or hide confirmed cases statement:
+if(n_confirmed > 0){showconf <- TRUE} else {showconf <- FALSE}
+
+# Get n_probable from compare table:
+n_probable <- compare %>% 
+  filter(name == "n_probable") %>% 
+  select(value_current) %>% 
+  pull() %>% 
+  as.numeric()
+
+# Create condition to show or hide confirmed cases statement:
+if(n_probable > 0){showprob <- TRUE} else {showprob <- FALSE}
+
+# Get n_possible from compare table:
+n_possible <- compare %>% 
+  filter(name == "n_possible") %>% 
+  select(value_current) %>% 
+  pull() %>% 
+  as.numeric()
+
+# Create condition to show or hide possible cases statement:
+if(n_possible > 0){showposs <- TRUE} else {showposs <- FALSE}
+
+# Calculate number of isolates for which sequencing is pending:
+n_seqpending <- linelist %>% 
+  
+  filter(isolate_ngsstatus == "vorgemerkt") %>% 
+  
+  count() %>% 
+  
+  pull()
+
+# Create condition to show or hide sequence pending statement:
+if(n_seqpending > 0){showseqpending <- TRUE} else {showseqpending <- FALSE}
+
+# Create condition to show or hide new bundesland statement:
+if(bundeslist$newstate_n > 0){
+  showbundnew <- TRUE
+} else {showbundnew <- FALSE}
+
+# Create condition to show or hide bundesland with new cases statement:
+if(bundeslist$newcases_n > 0){
+  showbundrise <- TRUE
+} else {showbundrise <- FALSE}
+
+# Create condition to show or hide bundesland with no change statement:
+if(bundeslist$nochange_n > 0){
+  showbundsame <- TRUE
+} else {showbundsame <- FALSE}
+
+# Extract number of salmonellosis deaths:
+n_deaths_salm <- compare %>% 
+  filter(name == "n_deaths_salmonella") %>% 
+  select(value_current) %>% 
+  pull() %>% 
+  as.numeric()
+
+# Extract number of other deaths:
+n_deaths_other <- compare %>% 
+  filter(name == "n_deaths_other") %>% 
+  select(value_current) %>% 
+  pull() %>% 
+  as.numeric()
+
+# Create condition to show 'no deaths' statement or not:
+if(n_deaths_salm + n_deaths_other == 0){
+  shownodeaths <- TRUE
+  nodeath_statement <- "Bislang wurden dem RKI keine Todesfälle übermittelt."
+} else {
+  shownodeaths <- FALSE
+}
+
+# Create condition for singular salmonella deaths:
+if(n_deaths_salm == 1){
+  nds_caseword <- "Todesfall"
+} else {
+  nds_caseword <- "Todesfälle"
+}
+
+# Create condition for singular other deaths:
+if(n_deaths_other == 1){
+  ndo_caseword <- "Todesfall"
+} else {
+  ndo_caseword <- "Todesfälle"
+}
+
+############################################################################
+### 05. DEFINE REPORT TITLE CONDITIONALLY ON CLUSTER OR OUTBREAK:
+
+# Update report title to outbreak or cluster as defined by outbreak_declared:
+report_title <- ifelse(
+  params$outbreak_declared == TRUE, 
+  paste0('Zusammenfassender Bericht über  Salmonellenausbrüche:\n', 
+         outbreakname),  
+  paste0('Zusammenfassender Bericht über Salmonella NGS-Cluster:\n', 
+         clustername))
+
+```
+
+
+---
+title: "`r report_title`"
+---
+
+`r ftext("Zusammenfassung", prop = nontoc_header)`
+<br>
+
+
+:::{custom-style="Colour_background"}
+
+<br>
+
+`r ftext("Überblick", prop = abstract_header)`
+
+Am `r cluster_decdate` hat das Nationale Referenzzentrum für Salmonellen und andere bakterielle Enteritiserreger ein neues NGS-Cluster mit der Bezeichnung `r clustername` identifiziert. Das Cluster gehört `r colourtext("serovars")` (`r colourtext("serogroups")`) an.  `r if(params$outbreak_declared){'Aufgrund der zeitlichen und geografischen Häufung wurde dieses Geschehen vom RKI am '}``r if(params$outbreak_declared){outbreak_decdate}` `r if(params$outbreak_declared){' als Ausbruch mit der Bezeichnung '}``r if(params$outbreak_declared){outbreakname}` `r if(params$outbreak_declared){' deklariert.'}`
+
+
+Bis zum `r colourtext('latest_update')` wurden insgesamt `r colourtext('n_cases')` Ausbruchsfälle diesem Geschehen zugeordnet. 
+
+
+<!-- `r if(showconf){"Davon sind "}``r if(showconf){colourtext('n_confirmed')}``r if(showconf){" als bestätigte Fälle kategorisiert."}` `r if(showprob){colourtext('n_probable')}``r if(showprob){" sind als wahrscheinlich kategorisiert."}` `r if(showposs){colourtext('n_possible')}``r if(showposs){" sind aufgrund der Serotypisierungsergebnisse als mögliche Fälle kategorisiert."}` `r if(showseqpending){'Für '}``r if(showseqpending){colourtext('n_seqpending')}``r if(showseqpending){' Ausbruchsfall / Ausbruchsfälle stehen die Sequenzierungsergebnisse noch aus.'}` -->
+
+
+Die Ausbruchsfälle stammen aus `r colourtext("n_bundesland")` verschiedenen Bundesländern. Dazu gehören `r if(showbundnew){colourtext('bundesland_new_n')}``r if(showbundnew){" Bundesländer, die zum ersten Mal Fälle melden ("}``r if(showbundnew){colourtext('bundesland_new_statement')}``r if(showbundnew){")"}` `r if(showbundrise){colourtext('bundesland_increased_n')}``r if(showbundrise){" mit neuen Fällen ("}``r if(showbundrise){colourtext('bundesland_increased_statement')}``r if(showbundrise){")"}` `r if((showbundnew | showbundrise) & showbundsame){" und "}``r if(showbundsame & params$previous_report){colourtext('bundesland_nochange_n')}``r if(showbundsame & params$previous_report){" ohne Veränderung der Fallzahlen seit dem letzten Bericht: "}``r if(showbundsame){colourtext('bundesland_nochange_statement')}`.
+
+
+Die Fälle sind über einen Zeitraum von `r colourtext("n_totalweeks")` Kalenderwochen aufgetreten. Der letzte Fall wurde am `r colourtext("max_reportdate")` gemeldet und der letzte übermittelte Erkrankungsbeginn ist der `r colourtext("max_onsetdate")`. 
+
+
+`r colourtext("statement_sexratio")` (`r colourtext("n_female")` x weiblich *vs.* `r colourtext("n_male")` x männlich). `r colourtext("statement_adultchild")` (mittleres Alter: `r colourtext("median_age")` Jahre, Spanne: `r colourtext("range_age")`, IQR: `r colourtext("iqr_age")`). Für `r colourtext("n_hosp_info")` Ausbruchsfälle liegen ausreichende Informationen zu Krankenhausaufenthalten vor. Davon wurden `r colourtext("n_hosp_salmonella")` aufgrund der Salmonellose und `r colourtext("n_hosp_other")` aufgrund anderer Ursachen ins Krankenhaus eingeliefert. `r if(shownodeaths){nodeath_statement}``r if(!shownodeaths){"Es gab "}``r if(!shownodeaths){colourtext('n_deaths_salmonella')}` `r if(!shownodeaths){nds_caseword}``r if(!shownodeaths){" aufgrund der Salmonellose "}``r if(!shownodeaths & n_deaths_salm > 0){"("}``r if(!shownodeaths & n_deaths_salm > 0){colourtext('deathsalm_different')}``r if(!shownodeaths & n_deaths_salm > 0){colourtext('deathsalm_same')}``r if(!shownodeaths & n_deaths_salm > 0){")"}` `r if(!shownodeaths){" und "}``r if(!shownodeaths){colourtext('n_deaths_other')}``r if(!shownodeaths){" Todesfall aufgrund anderer Ursachen"}``r if(!shownodeaths & n_deaths_other > 0){" ("}``r if(!shownodeaths & n_deaths_other > 0){colourtext('deathother_different')}``r if(!shownodeaths & n_deaths_other > 0){colourtext('deathother_same')}``r if(!shownodeaths & n_deaths_other > 0){")"}``r if(!shownodeaths){"."}` 
+
+
+`r ftext("Bewertung der Lage", prop = abstract_header)`
+
+`r ftext("[Fügen Sie hier zusätzlichen Text ein.]", prop = placeholder)`
+
+<br>
+
+:::
+
+<br>
+<br>
+
+
+```{r outbreak_infotable}
+
+# Extract total number of cases:
+n_cases <- compare %>% 
+  
+  filter(name == "n_cases") %>% 
+  
+  pull(value_current)
+
+# Extract serovar:
+serovars = linelist %>% 
+  
+  distinct(serovar_final) %>% 
+  
+  stringr::str_flatten_comma(last = " und ", na.rm = TRUE)
+
+
+# Create small table to hold the information:
+if(params$outbreak_declared){
+  
+  infotab <- data.frame(
+  
+  # Create labels according to report template:
+  infolabel = c("Bezeichnung des Ausbruches im RKI:", 
+                "Enthält folgende NGS-Cluster:", 
+                "In diesem Ausbruch enthaltene Serovare:",
+                "Anzahl der Ausbruchsfälle in Deutschland:"), 
+  
+  # Supply already calculated values:
+  infovalue = c(outbreakname, 
+                clustername,
+                serovars,
+                as.character(n_cases))
+  )
+
+} else {
+  
+  infotab <- data.frame(
+  
+  # Create labels according to report template:
+  infolabel = c("Enthält folgende NGS-Cluster:", 
+                "In diesem Ausbruch enthaltene Serovare:",
+                "Anzahl der Ausbruchsfälle in Deutschland:"), 
+  
+  # Supply already calculated values:
+  infovalue = c(clustername,
+                serovars,
+                as.character(n_cases))
+  )
+
+}
+
+
+  
+# Process as flextable:  
+infotab <- infotab %>% 
+  
+  # Convert to a flextable:
+  flextable() %>% 
+  
+  # Convert to box theme:
+  theme_box() %>% 
+  
+  # Change colour of all rows except last one to pale blue:
+  bg(i = 1:(nrow(infotab) - 1), 
+     part = "body", 
+     bg = "#C6D9F1") %>% 
+  
+  # Change colour of last row to dark blue:
+  bg(i = ~ infovalue == n_cases, 
+     part = "body",
+     bg = "#4F81BD") %>% 
+  
+  # Change font colour of header to white:
+  color(i = ~ infovalue == n_cases,
+        part = "body",
+        color = "white") %>% 
+  
+  # Right align values column:
+  align(j = ~ infovalue,
+        align = "right", 
+        part = "body") %>% 
+  
+  # Make values bold:
+  bold(j = ~ infovalue, 
+       part = "body") %>% 
+  
+  # Change font size to match front page:
+  fontsize(size = 10, part = "body") %>% 
+  
+  # Remove borders:
+  border_remove() %>% 
+  
+  # Delete header row:
+  delete_part(part = "header") %>% 
+  
+  # Set table width:
+  width(., width = pagewidth_cm/ncol(infotab), unit = "cm")
+
+
+### PRINT THE OUTBREAK INFO TABLE:
+infotab
+
+```
+
+
+\newpage
+
+
+`r ftext("Inhaltsverzeichnis", prop = nontoc_header)`
+
+```{r create_toc}
+
+# Insert table of contents:
+officer::block_toc()
+
+```
+
+
+\newpage
+
+
+# Falldefinitionen
+
+```{r import_casedefinition}
+
+######################################################
+# Import case definition date: 
+casedef_date <- rio::import(tmp_current, 
+                             sheet = "Falldefinition", 
+                             range = "B11", 
+                             col_names = FALSE) %>% 
+  
+  # Pull the value out of the data.frame:
+  pull()
+
+
+######################################################
+# Import the case definition from the line list:
+casedef <- rio::import(tmp_current, 
+                       sheet = "Falldefinition", 
+                       skip = 12, 
+                       col_names = FALSE) %>% 
+  
+  # Clean column names:
+  janitor::clean_names() %>% 
+  
+  # Remove rows with NA (oder):
+  drop_na(x1) %>% 
+  
+  # Reformat exclusions (Ausschluss) so that case type is column x5:
+  mutate(x5 = if_else(condition = is.na(x5), 
+                      true = "Ausschluss", 
+                      false = x5)) %>% 
+  
+  # Remove the Ausschluss title row:
+  filter(! x1 %in% "Ausschluss") %>% 
+  
+  # Remove numbers for exclusions:
+  mutate(across(.cols = c(x2,x3,x4), 
+                .fns = function(x) str_replace_all(x, "^[:digit:]+$", ""))) %>% 
+  
+  # Create combined cols for each definition:
+  unite(., col = "Definition",  x1, x2, x3, sep = " ", na.rm = TRUE) %>% 
+  
+  # Rename the column with case type:
+  rename(Falltyp = x5) %>% 
+  
+  # Select columns and reorder:
+  dplyr::select(Falltyp, Definition) %>% 
+  
+  # Change falltyp to title case:
+  mutate(Falltyp = tools::toTitleCase(tolower(Falltyp))) %>% 
+  
+  # Change 'outbreak' to 'case' in case type column:
+  mutate(Falltyp = gsub(pattern = "Ausbruchsfall", 
+                        replacement = "Fall", 
+                        x = Falltyp)) %>% 
+  
+  # Convert to flextable:
+  qflextable() %>% 
+  
+  # Change theme:
+  theme_box() %>% 
+  
+  # Merge repeat rows for Falltyp:
+  merge_v(j = ~Falltyp) %>% 
+  
+  # Make Falltyp values bold:
+  bold(j = ~Falltyp) %>% 
+  
+  # Add pale green for confirmed case definitions:
+  bg(i = ~ Falltyp == "Bestätigter Fall", 
+     bg = "palegreen", 
+     part = "body") %>% 
+  
+  # Add orange for probable case definitions:
+  bg(i = ~ Falltyp == "Wahrscheinlicher Fall", 
+     bg = "orange", 
+     part = "body") %>% 
+  
+  # Add pink for possible case definitions:
+  bg(i = ~ Falltyp == "Möglicher Fall", 
+     bg = "lightpink", 
+     part = "body") %>% 
+  
+  # Add grey for exclusion criteria:
+  bg(i = ~ Falltyp == "Ausschluss", 
+     bg = "lightgrey", 
+     part = "body") %>% 
+  
+  # Change background colour of header row:
+  bg(bg = "#4F81BD", 
+     part = "header") %>% 
+  
+  # Change font colour of header to white:
+  color(color = "white", 
+        part = "header") %>% 
+  
+  # Fit columns to text:
+  set_table_properties(layout = "autofit")
+
+
+### PRINT THE CASE DEFINITIONS TABLE:
+casedef
+
+
+### Note: Use set_table_properties(layout = "autofit") and not autofit() when
+# knitting to an MS word document.  This will fit the table to the margins.
+# autofit() will result in wide columns extending past the document page limit.
+
+```
+
+
+\pagebreak
+
+# Deskriptive Analyse des Ausbruchs
+
+
+## Geografische Verteilung der Fälle
+
+
+**Betroffene Bundesländer** (*n* = `r colourtext("n_bundesland")`):  
+
+```{r fedstates_list}
+
+# Extract the list of federal states with case numbers from compare table:
+fedstates_list <- compare %>% 
+  
+  filter(name == "statement_bundesland") %>% 
+  
+  pull(value_current)
+
+```
+
+
+`r ftext(fedstates_list, prop = nstyle)`
+
+
+```{r geodist_table, tab.cap = "Fallzahlen nach Bundesland des Wohnsitzes und/oder der Exposition"}
+
+# Get full list of two-letter codes for federal state:
+fedstate_codes <- unique(pop_berlin$bundesland_lettercode)
+
+# Group by Bundesland:
+fedstate_restab <- linelist %>%  
+
+  group_by(bundesland_lettercode) %>% 
+  
+  summarise(n_res = n())
+
+# Group by exposelocation_final:
+fedstate_exptab <- linelist %>% 
+  
+  group_by(exposelocation_final) %>% 
+  
+  summarise(n_exp = n())
+
+# Merge the two tables:
+fedstatetab <- full_join(
+  x = fedstate_restab,
+  y = fedstate_exptab,
+  by = join_by(bundesland_lettercode == exposelocation_final)) %>% 
+  
+  # Replace NAs in numeric columns with 0:
+  mutate(across(where(is.numeric), ~replace_na(.x, 0))) %>% 
+  
+  # Rename bundesland:
+  rename(bundesland = bundesland_lettercode) %>% 
+  
+  # Replace NA with unbekannt for bundesland column:
+  mutate(bundesland = replace_na(bundesland, "unbekannt")) %>% 
+  
+  # Pivot longer to start transposition of table:
+  pivot_longer(-bundesland) %>%
+  
+  # Complete the transposition:
+  pivot_wider(name, names_from = "bundesland", values_from = "value") %>% 
+  
+  # Add the sum column:
+  janitor::adorn_totals(where = "col", name = "Summe") %>% 
+  
+  # Rename row headers:
+  mutate(name = case_when(
+    name == "n_res" ~ "Wohnort",
+    name == "n_exp" ~ "Exposition"
+  ))
+
+  
+# Check which federal states are not yet included in the table:
+fs2add <- fedstate_codes[!fedstate_codes %in% names(fedstatetab)]
+
+
+# Add new columns dynamically to table:
+for(x in fs2add) fedstatetab <- fedstatetab %>% 
+  
+  # Give them all 0 as values:
+  mutate(!! x := 0)
+
+
+# Now re-order columns: 
+fedstatetab <- fedstatetab %>% 
+  
+  relocate(any_of(c("name", fedstate_codes, "unbekannt", "Ausland", "Summe")))
+
+
+# Convert to flextable and format:
+fedstateprint <- fedstatetab %>% 
+
+  # Convert to flextable:
+  qflextable() %>% 
+  
+  # Allow markdown formatting to hyperlink email addresses:
+  ftExtra::colformat_md(.sep = "\n") %>% 
+  
+  # Rename row header:
+  set_header_labels(name = "Fallzahlen pro") %>% 
+  
+  # Remove all borders with a theme:
+  theme_box() %>% 
+  
+  # Make column titles bold:
+  bold(part = "header") %>% 
+  
+  # Make last column italic:
+  italic(j = ncol(fedstatetab), 
+         part = "all") %>% 
+  
+  # Make first and last column body text bold:
+  bold(j = c(1, ncol(fedstatetab)), 
+       part = "body") %>% 
+  
+  # Make all the middle columns white text:
+  color(j = 2:(ncol(fedstatetab) - 1), 
+        color = "white", 
+        part = "header") %>% 
+  
+  # Change background colour of header row:
+  bg(bg = "#4F81BD", 
+     part = "header") %>%
+  
+  # Change the font size for whole table to 10 pt:
+  fontsize(size = 10, part = "all") %>% 
+
+  # Rotate headers of last three columns:
+  rotate(j = (ncol(fedstatetab)-2):ncol(fedstatetab),
+         align = "center", 
+         rotation = "btlr",
+         part = "header") %>% 
+  
+  # Align the rest of the column headers to bottom:
+  valign(j = 1:(ncol(fedstatetab)-3), 
+         valign = "center", 
+         part = "header") %>% 
+  
+  # Adjust height of header row:
+  height(height = 1.0, part = "header") %>% 
+  
+  # Adjust rule:
+  hrule(i = 1, rule = "exact", part = "header") %>% 
+  
+  # Fit columns to text:
+  set_table_properties(layout = "autofit") 
+
+
+# Print the table:
+fedstateprint
+
+```
+
+<br>
+
+
+```{r bundesland_bargraph, fig.cap = "Vergleich der Inzidenzen (Fallzahlen/100.000 Einwohner) pro Bundesland"}
+
+# Create table of cases by federal state:
+fedstate_incidence <- linelist %>% 
+  
+  # Remove NAs in bundesland:
+  drop_na(bundesland_lettercode) %>% 
+  
+  # Group by bundesland:
+  group_by(bundesland_lettercode) %>% 
+  
+  # Select bundesland:
+  select(bundesland_lettercode) %>%
+  
+  # Rename bundesland:
+  rename(bundesland = bundesland_lettercode) %>% 
+  
+  # Summarise number of cases by bundesland:
+  summarise(n_cases = n()) %>% 
+  
+  # Add rows for missing bundeslands (assign 0 cases):
+  tibble::add_row(bundesland = fs2add, n_cases = 0) %>% 
+  
+  # Join population to table:
+  left_join(pop_bundesland %>% select(hexcode, 
+                                      bundesland_lettercode, 
+                                      bundesland_pop), 
+            join_by(bundesland == bundesland_lettercode)) %>% 
+  
+  # Put hexcode at beginning:
+  relocate(hexcode, .after = bundesland) %>% 
+  
+  # Create bundesland incidence per 100,000 column:
+  mutate(incidence = round((n_cases / (bundesland_pop/100000)), digits = 2)) %>% 
+  
+  # Arrange table by decreasing incidence, then bundesland (alphabetic):
+  arrange(desc(incidence), bundesland) %>% 
+  
+  {
+    # Set plotting aesthetics (x and y axes):
+    ggplot(., mapping = aes(x = reorder(bundesland, incidence),
+                            y = incidence, 
+                            fill = hexcode)) +
+      
+      # Use stat = identity to use calculated incidence as y axis:
+      geom_bar(stat = "identity") + 
+      
+      # Use colour values assigned as fill in aes for fill colour:
+      scale_fill_identity() +
+  
+      # Set y axis breaks and limits dynamically:
+      scale_y_continuous(
+        limits = c(0.00, max(.$incidence) + 0.01), 
+        breaks = seq(from = 0.00, 
+                     to = max(.$incidence),
+                     by = 0.02), 
+        expand = c(0,0)) + # Get rid of white space below min limit on x axis
+      
+      # Update x axis label:
+      xlab("Bundesland des Wohnortes\n") +
+  
+      # Update y axis label:
+      ylab("\nInzidenz (Ausbruchsfälle/100.000 Einwohner)") +
+
+      # Flip graph on its side:
+      coord_flip() +
+      
+      # Apply plain theme:
+      theme_classic() +
+      
+      # Make axis titles bold:
+      theme(axis.title = element_text(face = "bold"))
+    
+  }
+
+############################
+# Print bar graph:
+fedstate_incidence
+
+```
+
+
+
+\pagebreak
+
+
+```{r map_data_prep}
+
+##########################################################
+# DATA PREP FOR INCIDENCE CALCULATIONS
+
+# Create table of cases by kreise:
+kreise_tab <- linelist %>%
+  
+  select(kreise_final, kreise_code) %>% 
+  
+  drop_na(kreise_final) %>% 
+  
+  group_by(kreise_final, kreise_code) %>% 
+  
+  summarise(n_cases = n())
+
+
+# Calculate number of sub-districts in Berlin with cases:
+berlin_districts <- linelist %>% 
+  
+  filter(!is.na(berlin_district_name)) %>%
+  
+  distinct(berlin_district_name) %>% 
+  
+  count() %>% 
+  
+  pull()
+
+# Create conditional statement for Berlin districts:
+if(berlin_districts > 1){
+  showberlin <- TRUE
+} else {
+  showberlin <- FALSE
+}
+
+# Conditionally create Berlin sub-districts table:
+if(berlin_districts > 1){
+  
+  # Create table of cases by Berlin sub-district:
+  berlin_tab <- linelist %>% 
+    
+    select(berlin_district_name, berlin_district_code) %>% 
+    
+    drop_na(berlin_district_name) %>% 
+    
+    group_by(berlin_district_name, berlin_district_code) %>% 
+    
+    summarise(n_cases = n())
+}
+
+
+##########################################################
+# INCIDENCE CALCULATIONS:
+
+##### Create incidence table:
+kreise_incidence <- sf_kreise %>% 
+  
+  # Join county table for case numbers:
+  left_join(kreise_tab %>% select(-kreise_final)) %>% 
+  
+  # Remove areas with no population figures:
+  drop_na(kreise_pop) %>% 
+  
+  # Convert county population from character to numeric:
+  mutate(kreise_pop = as.numeric(kreise_pop)) %>% 
+  
+  # Calculate incidence per 100000 population:
+  mutate(incidence = round((n_cases / (kreise_pop/100000)), digits = 3)) %>% 
+  
+  # Put incidence after n_cases to make it easier to review:
+  relocate(incidence, .after = n_cases) %>% 
+  
+  # Arrange by incidence in descending order:
+  arrange(desc(incidence)) %>% 
+  
+  # Create column with incidence break labels:
+  mutate(incidence_breaks = ibreak_labeller(x = incidence)) 
+
+
+##########################################################
+# DEFINE COLOUR PALATTE:
+
+# Define colour scheme:
+mypal <- grDevices::hcl.colors(n = 5, 
+                               palette = "Blues", 
+                               rev = TRUE)[2:5]
+
+# Update mypal to include white for NAs:
+mypal <- c("white", mypal)
+
+# Extract the incidence break labels:
+ibreak_labels <- kreise_incidence %>% 
+  
+  # Remove geometry:
+  st_drop_geometry() %>% 
+  
+  # Remove NAs from incidence breaks:
+  drop_na(incidence_breaks) %>% 
+  
+  # Fetch distinct values for incidence breaks:
+  distinct(incidence_breaks) %>% 
+  
+  # Pull the distinct values:
+  pull() %>% 
+  
+  # Reverse the order (from descending to ascending):
+  rev()
+
+
+# Create the colour palette:
+map_pal <- mypal[1:length(ibreak_labels)]
+
+
+# Put the colours and labels together:
+mapcolours <- setNames(object = map_pal, 
+                       nm = ibreak_labels)
+
+##########################################################
+# CLASS INTERVAL METHOD LABEL:
+
+# Improve description of class interval method from params:
+if(params$map_breaks == "fisher"){
+  mapinterval_label = "Fisher Jenks"
+} else {
+  mapinterval_label = params$map_breaks
+}
+
+```
+
+
+```{r kreise_map, fig.cap = "Stadt- oder Landkreise mit Ausbruchsfällen", fig.height = 6}
+
+##########################################################
+# CHOROPLETH MAP OF INCIDENCE BY KREISE:
+
+#Create the map:
+kreise_map <- kreise_incidence %>% 
+  
+  # Start the plot:
+  ggplot2::ggplot() + 
+  
+  # Add the sf_kreise geom with incidence breaks:
+  geom_sf(
+    mapping = aes(geometry = geometry, fill = incidence_breaks), 
+    colour = "darkgrey", 
+    size = 0.5, 
+    na.rm = TRUE) +
+  
+  # Add the sf_bundesland geom for bundesland borders:
+  geom_sf(data = sf_bundesland,
+          fill = alpha("white", 0), 
+          colour = "black", 
+          size = 1) +
+
+  # Specify how the fill colours should be set:
+  scale_fill_manual(
+    values = mapcolours,
+    na.translate = FALSE
+    ) +
+
+  # Set the legend title and colour order in the legend:
+  guides(fill = guide_legend(
+    title = expression(atop(bold("Inzidenz"), "(Fallzahlen/100.000 Einwohner)")), 
+    reverse = FALSE)) + 
+  
+  # Apply the ggplot theme_nothing to remove grid lines:
+  ggmap::theme_nothing(legend = TRUE) +
+  
+  # Add footnote with class interval method used:
+  labs(caption = stringr::str_glue("Klassenintervallmethode: {mapinterval_label}")) +
+  
+  # Right-align caption to plot edge:
+  theme(plot.caption.position = "plot")
+
+#####################################
+# Print county table and map:
+
+kreise_map
+
+```
+
+<br>
+
+```{r incidence_table, tab.cap = "Die Kreise mit der höchsten Inzidenz pro 100.000 Einwohner:"}
+
+# Create table with top 5 Kreise according to incidence:
+top5kreise <- kreise_incidence %>% 
+  
+  select(kreise_name, kreise_pop, n_cases, incidence) %>% 
+  
+  st_drop_geometry() %>% 
+  
+  slice_head(n = 5) %>% 
+  
+  qflextable() %>% 
+  
+  theme_booktabs() %>% 
+  
+  set_header_labels(
+    kreise_name = "Kreis", 
+    kreise_pop = "Bevölkerung",
+    n_cases = "Anzahl der Fälle",
+    incidence = "Inzidenz"
+  ) %>% 
+  
+  bold(part = "header") %>% 
+  
+  # Fit columns to text:
+  set_table_properties(layout = "autofit")
+
+##########################################
+# Print the table:
+
+top5kreise
+
+```
+
+
+
+```{r berlin_map, eval = showberlin, fig.cap = "Berliner Bezirke mit Ausbruchsfällen (Fallzahlen/100.000 Einwohner)"}
+
+# Add incidence to Berlin shapefile:
+berlin_incidence <- sf_berlin %>% 
+  
+  # Join case numbers to shapefile:
+  left_join(berlin_tab %>% select(-berlin_district_name)) %>% 
+  
+  # Make sure population is numeric:
+  mutate(berlin_district_pop = as.numeric(berlin_district_pop)) %>% 
+  
+  # Calculate incidence per 100000 population:
+  mutate(incidence = round((n_cases / (berlin_district_pop/100000)), 
+                           digits = 3)) %>% 
+  
+  # Put incidence after n_cases to make it easier to review:
+  relocate(incidence, .after = n_cases) %>% 
+  
+  # Arrange by incidence in descending order:
+  arrange(desc(incidence)) 
+
+
+
+# Create the map:
+berlin_map <- berlin_incidence %>% 
+  
+  # Remove labels for areas with no incidence:
+  mutate(berlin_district_name = case_when(
+    is.na(incidence) ~ NA_character_,
+    TRUE ~ berlin_district_name)) %>%
+
+  # Start the plot:
+  ggplot2::ggplot() + 
+  
+  # Add the sf_berlin geom:
+  geom_sf(mapping = aes(fill = incidence), 
+          colour = "black", 
+          size = 1, 
+          na.rm = TRUE) +
+  
+  # Specify how the fill colours should be set:
+  scale_fill_distiller(palette = "Blues", 
+                       na.value = "white", 
+                       breaks = scales::breaks_pretty(),
+                       labels = scales::label_number(decimal.mark = ","),
+                       direction = 1) +
+
+  # Add labels for Berlin districts with incidence > 0:
+  ggsflabel::geom_sf_label_repel(mapping = aes(
+    label = ifelse(!is.na(berlin_district_name), 
+                   paste0(berlin_district_name, 
+                          ": ", 
+                          format(incidence, decimal.mark = ",")), 
+                   NA_character_)),
+    hjust = 0, 
+    size = 3,
+    box.padding = 0.35, 
+    segment.size = 0.25, 
+    nudge_x = 0.5,
+    direction = 'y',
+    na.rm = TRUE) +
+  
+  # Set the legend title and colour order in the legend:
+  guides(fill = guide_legend(
+    title = expression(atop(bold("Inzidenz"), "(pro 100.000 Einwohner)")), 
+    reverse = FALSE)) + 
+  
+  # Apply the ggplot theme_nothing to remove grid lines:
+  ggmap::theme_nothing(legend = TRUE)
+
+
+####################
+# Print map:
+
+berlin_map
+
+```
+
+
+\pagebreak
+
+
+
+## Zeitliche Verteilung der Fälle
+
+
+```{r epicurve, fig.height = 5, fig.cap = "Epidemiekurve der Fälle: gesamter Ausbruch bis heute"}
+
+# Define stratifier from params:
+if(params$stratifier == "Bundesland"){
+  
+  # Define stratum as bundesland 2-letter code:
+  strata <- "bundesland_lettercode"
+  
+  # Define name for legend:
+  legendname <- "Bundesland"
+  
+  # Define colour palatte as bundesland hexcodes:
+  colpalate <- setNames(object = c(pop_bundesland$hexcode, "lightgrey"), 
+                        nm = c(pop_bundesland$bundesland_lettercode, "Unbekannt"))
+  
+} else if(params$stratifier == "Falldefinition"){
+  
+  # Define stratum as case definition:
+  strata <- "case_definition"
+  
+  # Define name for legend:
+  legendname <- "Falldefinition"
+  
+  # Define colour palatte from case definition table:
+  colpalate <- setNames(object = c("palegreen", 
+                                    "orange", 
+                                    "lightpink",
+                                   "lightgrey"), 
+                         nm = c("Bestätigter", 
+                                "Wahrscheinlicher", 
+                                "Möglicher", 
+                                "Unbekannt"))
+}
+
+
+######################################
+
+### Define weekly breaks
+week_breaks <- seq.Date(
+  # Define minimum date in series (to start Monday before first case):
+  from = floor_date(x = min(linelist$epicurve_dates, na.rm = TRUE), 
+                    unit = "week", 
+                    week_start = 1),
+  # Define maximum date in series (to end Monday after latest case):
+  to   = ceiling_date(x = max(linelist$epicurve_dates, na.rm = TRUE),
+                      unit = "week", 
+                      week_start = 1),
+  # Define interval unit (aggregate in weeks):
+  by   = "week")
+
+
+### Define monthly breaks
+month_breaks <- seq.Date(
+  # Define minimum date in series (to start 1st day of month before 1st case):
+  from = floor_date(x = min(linelist$epicurve_dates, na.rm = TRUE), 
+                    unit = "month"),
+  # Define maximum date in series (to end 1st day of month after last case):
+  to   = ceiling_date(x = max(linelist$epicurve_dates, na.rm = TRUE),
+                      unit = "month"),
+  # Define interval unit (aggregate in months):
+  by   = "month")
+
+
+### Define quarter breaks
+quarter_breaks <- seq.Date(
+  # Define minimum date in series (to start 1st day of quarter before 1st case):
+  from = floor_date(x = min(linelist$epicurve_dates, na.rm = TRUE), 
+                    unit = "quarter"),
+  # Define maximum date in series (to end 1st day of quarter after last case):
+  to   = ceiling_date(x = max(linelist$epicurve_dates, na.rm = TRUE),
+                      unit = "quarter"),
+  # Define interval unit (aggregate in quarters):
+  by   = "quarter")
+
+
+######################################
+# Conditional weeks or months:
+
+# Extract total duration of outbreak in weeks:
+n_totalweeks <- compare %>% 
+  
+  filter(name == "n_totalweeks") %>% 
+  
+  pull(value_current) %>% 
+  
+  as.numeric()
+
+# Set main epicurve units to be year quarter, months or weeks:
+if(n_totalweeks > 52){
+  
+  epicurve_interval <- "3 months"
+  
+  epicurve_order <- "epicurve_yearquarter"
+  
+  epicurve_breaks <- quarter_breaks
+  
+  epicurve_labels <- "%m"
+  
+} else if(n_totalweeks > 23 & n_totalweeks <= 52){
+  
+  epicurve_interval <- "month"
+  
+  epicurve_order <- "epicurve_yearmonth"
+  
+  epicurve_breaks <- month_breaks
+  
+  epicurve_labels <- "%b"
+  
+} else {
+  
+  epicurve_interval <- "week"
+  
+  epicurve_order <- "epicurve_yearweek"
+  
+  epicurve_breaks <- week_breaks
+  
+  epicurve_labels <- "%W"
+  
+}
+
+
+
+######################################
+# Create main epicurve:
+
+# Prepare aggregate data:
+epicurve <- linelist %>% 
+  
+  # Rename strata as strata:
+  rename(strata = !!sym(strata)) %>% 
+  
+  # Add 'unknown' level to factor to represent NAs:
+  mutate(strata = forcats::fct_na_value_to_level(
+    f = strata,
+    level = "Unbekannt")) %>%
+
+  # Reorder levels of strata:
+  mutate(strata = fct_relevel(.f = strata,
+                              "Unbekannt",
+                              after = Inf)) %>%
+  
+  # Arrange data by main epicurve_order and strata:
+  arrange(!!sym(epicurve_order), strata) %>% 
+
+  # Create grouping variable for epi squares:
+  mutate(blocks = 1:n()) %>% 
+  
+  # Create plot:
+  ggplot() +
+  
+  # Create geom:
+  geom_histogram(mapping = aes(x = epicurve_dates, 
+                               fill = strata, 
+                               group = blocks), 
+                 
+                 just = 0.5,
+                 breaks = epicurve_breaks,
+                 closed = "left",
+                 colour = "white") +
+  
+  # Set labels for date axis:
+  scale_x_date(date_breaks = epicurve_interval,
+               minor_breaks = NULL, 
+               expand = expansion(add = 3),
+               labels = label_date_axis) +
+  
+  # Remove space from bottom of x axis and present y axis labels as integers:
+  scale_y_continuous(expand = c(0,0), 
+                     breaks = ~round(unique(pretty(.)))) +             
+  
+  # Set colour palatte:
+  scale_fill_manual(values = colpalate,
+                    name = expr(bold(!!legendname)), 
+                    na.value = "lightgrey") +
+  
+  # Add the axis and fill labels:
+  labs(x = "\nDatum Erkrankungsbeginn (bzw. [Meldewoche o. Laborwoche - 1], wenn nicht bekannt)",
+       y = "Anzahl der Fälle\n") +
+  
+  # aesthetic themes
+  theme_classic() +
+  
+  # Make axis titles bold:
+  theme(axis.title = element_text(face = "bold", size = 10), 
+        axis.text.x = element_text(hjust = 0),
+        axis.ticks.x = element_blank(), 
+        legend.key.size = unit(0.5, 'cm'),
+        legend.title = element_text(size = 9),
+        legend.text = element_text(size = 9),
+        legend.position = "top", 
+        legend.justification = "left",
+        legend.direction = "horizontal") +
+
+  # Add markdown:
+  theme(axis.text.x = ggtext::element_markdown()) +
+  
+  # Put legend in 9 columns:
+  guides(fill = guide_legend(ncol = 10))
+
+
+
+#####################
+# Print the plot:
+
+# Print main epicurve:
+epicurve
+
+# If outbreak > 23 weeks, print epicurve weeks subset:
+if(n_totalweeks > 23){
+  
+  show_epicurve_detail = TRUE
+  
+} else {
+  
+  show_epicurve_detail = FALSE
+  
+}
+
+```
+
+
+```{r epicurve_detail, eval = show_epicurve_detail, fig.height = 5, fig.cap = "Epidemiekurve der Fälle: letzte 20 Wochen"}
+
+################################################
+# Add detailed epicurve if outbreak > 23 weeks:
+
+###########################################
+# Reset epicurve label prefix:
+epicurve_labels <- "%W"
+
+##########################################
+# Calculate lower date limit for epicurve:
+
+epicurve_minweek <- linelist %>% 
+  
+  select(epicurve_dates) %>% 
+    
+  drop_na() %>% 
+    
+  pull() %>% 
+    
+  max() - lubridate::weeks(20)
+  
+  
+##################################
+# Calculate subset of week breaks:
+
+week_breaks_subset <- subset(week_breaks, 
+                             week_breaks >= epicurve_minweek)
+  
+###############################
+# Create weeks subset epicurve:
+
+epicurve_detail <- linelist %>% 
+  
+  # Filter for epicurve dates greater than epicurve_minweek:
+  filter(epicurve_dates >= epicurve_minweek) %>% 
+    
+  # Rename strata as strata:
+  rename(strata = !!sym(strata)) %>% 
+    
+  # Add 'unknown' level to factor to represent NAs:
+  mutate(strata = forcats::fct_na_value_to_level(
+    f = strata,
+    level = "Unbekannt")) %>%
+    
+  # Reorder levels of strata:
+  mutate(strata = fct_relevel(.f = strata,
+                              "Unbekannt",
+                              after = Inf)) %>%
+  
+  # Arrange data by epicurve_weeks and strata:
+  arrange(!!sym(epicurve_order), strata) %>% 
+    
+  # Create grouping variable for epi squares:
+  mutate(blocks = 1:n()) %>% 
+    
+  # Create plot:
+  ggplot() +
+    
+  # Create geom:
+  geom_histogram(mapping = aes(x = epicurve_dates,
+                               fill = strata, 
+                               group = blocks), 
+                 just = 0.5,
+                 breaks = week_breaks_subset,
+                 closed = "left",
+                 colour = "white") +
+    
+  # Set labels for date axis:
+  scale_x_date(date_breaks = "week",
+               minor_breaks = NULL, 
+               expand = expansion(add = 3),
+               labels = label_date_axis) +
+    
+  # Remove space from bottom of x axis and present y axis labels as integers:
+  scale_y_continuous(expand = c(0,0), 
+                     breaks = ~round(unique(pretty(.)))) + 
+  
+  
+    
+  # Set colour palatte:
+  scale_fill_manual(values = colpalate,
+                    name = expr(bold(!!legendname)), 
+                    na.value = "lightgrey") +
+    
+  # Add the axis and fill labels:
+  labs(x = "\nDatum Erkrankungsbeginn (bzw. [Meldewoche o. Laborwoche - 1], wenn nicht bekannt)",
+       y = "Anzahl der Fälle\n") +
+  
+  # aesthetic themes
+  theme_classic() + 
+    
+  # Make axis titles bold:
+  theme(axis.title = element_text(face = "bold", size = 10), 
+        axis.text.x = element_text(hjust = 0),
+        axis.ticks.x = element_blank(), 
+        legend.key.size = unit(0.5, 'cm'),
+        legend.title = element_text(size = 9),
+        legend.text = element_text(size = 9),
+        legend.position = "top", 
+        legend.justification = "left",
+        legend.direction = "horizontal") +
+    
+  # Add markdown:
+  theme(axis.text.x = ggtext::element_markdown()) +
+    
+  # Put legend in 9 columns:
+  guides(fill = guide_legend(ncol = 10))
+
+
+# Print epicurve for last 20 weeks:
+epicurve_detail
+
+```
+
+
+
+Der Median der Zahl der Fälle pro Woche (ohne Wochen ohne Fälle) beträgt `r compare$value_current[compare$name == "median_cpw"]`. Der früheste Fall trat am `r compare$value_current[compare$name == "min_epidate"]` auf (Kalenderwoche `r compare$value_current[compare$name == "min_epiweek"]`).  50 % der bisher gemeldeten Fälle (n = `r compare$value_current[compare$name == "n_50percentcases"]`) wurden bis zur Kalenderwoche `r compare$value_current[compare$name == "median_week"]` festgestellt, wobei die höchste wöchentliche Fallzahl (n = `r compare$value_current[compare$name == "max_cpw"]`) in der Kalenderwoche `r compare$value_current[compare$name == "max_cpw_week"]` auftrat. Der letzte Fall bzw. die letzten Fälle (n = `r compare$value_current[compare$name == "n_latestcases"]`) traten in der Kalenderwoche `r compare$value_current[compare$name == "max_epiweek"]` auf (letzte übermittelte Erkrankungsbeginn: `r compare$value_current[compare$name == "max_onsetdate"]`).
+
+
+\pagebreak
+
+
+## Beschreibung der Ausbruchsfälle nach Altergruppe und Geschlecht
+
+
+```{r age_sex_pyramid, fig.cap = "Alter-Geschlecht-Pyramide"}
+
+# Create named list for the colour palate:
+sexcolours <- setNames(object = c("#B9CDE5",
+                                  "#E6B9B8"), 
+                        nm = c('männlich',
+                               'weiblich'))
+
+# Define what values of sex exist in the data:
+sexindata <- linelist %>% 
+  
+  select(sex_final) %>% 
+  
+  pull() %>% 
+  
+  unique()
+
+# Restrict sexcolours to what actually exists in the data:
+sexcolours <- subset(sexcolours, names(sexcolours) %in% sexindata)
+
+
+# Create the age sex pyramid:
+agesexpyramid <- linelist %>% 
+  
+  drop_na(age_cat) %>% 
+  
+  drop_na(sex_final) %>% 
+  
+  apyramid::age_pyramid(age_group = "age_cat", 
+                        split_by = "sex_final", 
+                        show_midpoint = FALSE, 
+                        pal = sexcolours) +
+  
+  # Update legend title:
+  labs(fill = expr(bold("Geschlecht")), 
+       x = "Altersklassen (Jahre)\n", 
+       y = "\nAnzahl der Fälle") +
+  
+  # Hardcode y axis interval (number of cases) to 1:
+  scale_y_continuous(breaks = integer_breaks()) +
+  
+  # Change theme to classic:
+  theme_classic() +
+  
+  # Make axis titles bold:
+  theme(axis.title = element_text(face = "bold", size = 10))
+
+# Print the age sex pyramid:
+agesexpyramid
+
+```
+<br>
+
+```{r agesex_piebox, fig.height = 3.5, fig.cap = "(A) Boxplot des Alters; (B) Kuchendiagramm der Geschlechterverteilung"}
+
+##########################
+# Create age sex boxplot:
+
+# Calculate median age by sex:
+agesex_medians <- linelist %>% 
+  
+  group_by(sex_final) %>% 
+  
+  summarise(median = median(age_final, na.rm = TRUE))
+
+# Extract overall median:
+age_median <- compare %>% 
+  
+  filter(name == "median_age") %>% 
+  
+  select(value_current) %>% 
+  
+  pull()
+
+# Create the boxplot:
+age_boxplot <- linelist %>% 
+  
+  drop_na(age_final) %>% 
+  
+  ggplot() +
+  
+  # Define x and y axis and fill colours:
+  geom_boxplot(mapping = aes(y = age_final), 
+               fill = "#4F81BD") +
+  
+  # Limit to 100:
+  coord_cartesian(ylim = c(0, 100)) +
+  
+  # Add classic theme (removes gridlines):
+  theme_classic() +
+  
+  # Add axis labels and caption:
+  labs(x = "Alle Fälle", 
+       y = "Alter (Jahre)", 
+       caption = stringr::str_glue("Medianalter insgesamt: {age_median} Jahre")) +
+  
+  # Format font of axis titles, text label and caption:
+  theme(axis.title = element_text(face = "bold", size = 10),
+        axis.text.y = element_text(size = 10), 
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.caption = element_text(size = 10)) +
+  
+  # Add plot subtitle:
+  ggtitle("A")
+
+
+#################################
+# Create sex distribution pie:
+
+# Create table with percentages:
+sexpie <- linelist %>%
+  
+  # Remove NAs:
+  drop_na(sex_final) %>% 
+  
+  # Tabulate
+  janitor::tabyl(sex_final) %>% 
+  
+  # Convert proportion to percentages:
+  adorn_pct_formatting(digits = 0) %>% 
+  
+  # Add colours:
+  mutate(hexcodes = sexcolours) %>% 
+  
+  # Calculate positions for the labels:
+  mutate(csum = rev(cumsum(rev(n))), 
+         pos = n/2 + lead(csum, 1),
+         pos = if_else(is.na(pos), n/2, pos))
+
+
+########################
+# Create the pie chart:
+sex_piechart <- ggplot(data = sexpie, 
+                       mapping = aes(x = "" , 
+                                     y = n, 
+                                     fill = fct_inorder(sex_final))) +
+  
+  # Make a single column bar chart:
+  geom_col(width = 1, color = 1) +
+  
+  # Convert to pie chart:
+  coord_polar(theta = "y") +
+  
+  # Add the colours:
+  scale_fill_manual(values = sexpie$hexcodes) +
+  
+  # Add the geom repel labels with percentages:
+  ggrepel::geom_label_repel(data = sexpie,
+                            aes(y = pos, label = percent),
+                            size = 4.5, 
+                            # Change text colour make visible with background:
+                            color ="black",
+                            nudge_x = 1, 
+                            show.legend = FALSE) +
+  
+  # Add legend with text labels (short names):
+  guides(fill = guide_legend(title = "Geschlecht")) +
+  
+  # Remove background grid:
+  theme_void() +
+  
+  # Make legend title bold:
+  theme(legend.title = element_text(size = 10, face = "bold")) +
+  
+  # Add subtitle with extra line breaks to align with taller boxplot:
+  ggtitle("B\n\n\n\n")
+
+
+#########################
+# Print the two charts:
+
+gridExtra::grid.arrange(
+  age_boxplot,
+  sex_piechart,
+  ncol = 2)
+
+```
+
+<br>
+
+
+```{r agesex_table, tab.cap = "Alters- und Geschlechtsverteilung"}
+
+# Create summary table for age and sex:
+agesextab <- linelist %>%
+  
+  # Select columns to include:
+  select(age_final, sex_final) %>% 
+  
+  gtsummary::tbl_summary(
+    
+    # Specify column types to make sure correct statistic is applied:
+    type = list(age_final ~ "continuous", 
+                sex_final ~ "categorical"),
+    
+    # Calculate percentages from columns:
+    percent = "column", 
+    
+    # Show missing values only if present:
+    missing = "ifany", 
+    
+    # Text label for missing values:
+    missing_text = "Unbekannt", 
+    
+    # Specify statistics:
+    statistic = list(
+      all_continuous() ~ "{median} ({p25}, {p75})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    
+    # Make nice labels:
+    label  = list(
+      age_final ~ "Alter (Jahre)",                           
+      sex_final ~ "Geschlecht")
+    
+  ) %>% 
+  
+  # Make variable names bold and italics:
+  bold_labels() %>% 
+  italicize_labels() %>% 
+  
+  # Modify header:
+  modify_header(
+    label = "**Charakteristisch**",
+    stat_0 = "**Fälle insgesamt**\n_N_ = {N}",
+    ) %>% 
+  
+  # Modify footnotes:
+  modify_footnote(text_interpret = "md", 
+                  all_stat_cols() ~ 
+                    "Median (IQR) für Alter; n (%) für Geschlecht") %>%
+  
+  # Convert to flextable for printing:
+  gtsummary::as_flex_table() %>% 
+  
+  # Fit columns to text:
+  set_table_properties(layout = "autofit")
+
+#######################
+# Print table:
+
+agesextab
+
+```
+
+
+
+\pagebreak
+
+
+## Beschreibung der Krankheitsschwere
+
+
+```{r disease_severity_table, tab.cap = "Krankenhausaufenthalte und Todesfälle"}
+
+# Extract total number of cases with info on hospitalisation status:
+n_hosp_info <- compare %>% 
+  
+  filter(name == "n_hosp_info") %>% 
+  
+  select(value_current) %>% 
+  
+  pull() %>%
+  
+  as.numeric()
+
+# Extract total number of outbreak cases that died (any cause):
+n_death_total <- compare %>% 
+  
+  filter(name %in% c("n_deaths_salmonella", "n_deaths_other")) %>% 
+  
+  select(value_current) %>% 
+  
+  pull() %>% 
+  
+  as.numeric() %>% 
+  
+  sum()
+
+######################################################
+# Create summary table for hospitalisation and deaths:
+hospdeathtab <- linelist %>%
+  
+  # Select columns to include:
+  select(hosp_final, death_final) %>% 
+  
+  # Convert not hospitalised (Nicth gestorben) factor level to NA:
+  mutate(death_final = fct_recode(death_final,
+                                  NULL = "Nicht gestorben")) %>% 
+  
+  # Create gtsummary table:
+  gtsummary::tbl_summary(
+    
+    # Calculate percentages from columns:
+    percent = "column", 
+    
+    # Show missing values only if present:
+    missing = "no", 
+    
+    # Make nice labels:
+    label  = list(
+      hosp_final ~ "Fälle mit vollständigen Angaben zum Hospitalisierungsstatus", 
+      death_final ~ "Todesfälle")
+    
+  ) %>% 
+  
+  # Add total non-missing for hospital and deaths:
+  add_n(statistic = "{N_nonmiss}") %>% 
+  
+  # Make variable names bold and italics:
+  bold_labels() %>% 
+  italicize_labels() %>%
+  
+  # Modify header:
+  modify_header(
+    label = "**Charakteristisch**",
+    stat_0 = "**Fälle**"
+    ) %>% 
+  
+  # Modify footnotes:
+  modify_footnote(text_interpret = "md", 
+                  all_stat_cols() ~ 
+                    "n (%) der Fälle mit vollständigen Angaben zum Hospitalisierungsstatus") %>%
+  
+  # Convert to flextable for printing:
+  gtsummary::as_flex_table() %>% 
+  
+  # Make non-missing totals bold:
+  flextable::bold(i = c(1,5), 
+                  j = 2) %>% 
+  
+  # Replace N with correct hospitalised total:
+  flextable::compose(i = 1, 
+                     j = 2, 
+                     as_paragraph(as_chunk(as.integer(n_hosp_info)))) %>% 
+  
+  # Replace N with correct deaths total:
+  flextable::compose(i = 5, 
+                     j = 2, 
+                     as_paragraph(as_chunk(as.integer(n_death_total)))) %>% 
+  
+  # Replace NAs with 0 for deaths:
+  flextable::compose(i = ~ stat_0 == "0 (NA%)",
+                     j = 3,
+                     as_paragraph(as_chunk("0 (0%)"))) %>% 
+  
+  # Set rows to colour scheme for hospital status:
+  bg(i = 2, bg = "#002060") %>% 
+  
+  bg(i = 3, bg = "#00B0F0") %>% 
+  
+  bg(i = 4, bg = "#C2D69B") %>% 
+  
+  # Change colour of font for dark blue background to white:
+  color(i = 2, color = "white") %>% 
+  
+  # Fit columns to text:
+  set_table_properties(layout = "autofit")
+
+
+#######################
+# Print table:
+
+hospdeathtab
+
+```
+
+<br>
+
+
+```{r hospital_piechart, fig.height = 3.5, fig.cap = "Kuchendiagramm des Krankenhausaufenthaltsstatus"}
+
+#################################
+# Create table with percentages:
+hospie <- linelist %>%
+  
+  # Remove NAs:
+  drop_na(hosp_final) %>% 
+  
+  # Tabulate
+  janitor::tabyl(hosp_final) %>% 
+  
+  # Convert proportion to percentages:
+  adorn_pct_formatting(digits = 0) %>% 
+  
+  # Add short names for the labels:
+  mutate(shortlabs = case_when(
+    
+    # Hospitalised due to Salmonella label:
+    hosp_final == "Hospitalisierung aufgrund der Salmonellose" 
+    ~ "Hospitalisiert aufgrund der Salmonellose",
+    
+    # Hospitalised due to other causes label:
+    hosp_final == "Hospitalisierung aufgrund anderer Ursachen" 
+    ~ "Hospitalisiert aufgrund anderer Ursachen",
+    
+    # Not hospitalised label:
+    hosp_final == "Nicht hospitalisiert" 
+    ~ "Nicht hospitalisiert"
+    
+    )) %>% 
+  
+  # Add colours:
+  mutate(hexcodes = case_when(
+    
+    # Colour for salmonella hospitalisations:
+    shortlabs == "Hospitalisiert aufgrund der Salmonellose" ~ "#002060",
+    
+    # Colour for other cause hospitalisations:
+    shortlabs == "Hospitalisiert aufgrund anderer Ursachen" ~ "#00B0F0",
+    
+    # Colour for not hospitalised cases:
+    shortlabs == "Nicht hospitalisiert" ~ "#C2D69B"
+    
+    )) %>% 
+  
+  # Calculate positions for the labels:
+  mutate(csum = rev(cumsum(rev(n))), 
+         pos = n/2 + lead(csum, 1),
+         pos = if_else(is.na(pos), n/2, pos))
+
+
+########################
+# Create the pie chart:
+piechart <- ggplot(data = hospie, 
+                   mapping = aes(x = "" , 
+                                 y = n, 
+                                 fill = fct_inorder(shortlabs))) +
+  
+  # Make a single column bar chart:
+  geom_col(width = 1, color = 1) +
+  
+  # Convert to pie chart:
+  coord_polar(theta = "y") +
+  
+  # Add the colours:
+  scale_fill_manual(values = hospie$hexcodes) +
+  
+  # Add the geom repel labels with percentages:
+  ggrepel::geom_label_repel(data = hospie,
+                            aes(y = pos, label = percent),
+                            size = 4.5, 
+                            # Change text colour make visible with background:
+                            color = c("white", "white", "black"),
+                            nudge_x = 1, 
+                            show.legend = FALSE) +
+  
+  # Add legend with text labels (short names):
+  guides(fill = guide_legend(title = "Fälle mit vollständigen Angaben zum Hospitalisierungsstatus")) +
+  
+  # Remove background grid:
+  theme_void() +
+  
+  # Make legend title bold:
+  theme(legend.title = element_text(size = 10, face = "bold"))
+
+
+######################
+# Print the piechart:  
+
+piechart
+
+```
+
+<br>
+
+```{r hospital_boxplot, fig.height = 3.5, fig.cap = "Boxplot des Alters nach Hospitalisierungsstatus"}
+
+# Set hospital status colours:
+hospcolours <- setNames(object = c("#002060", 
+                                   "#00B0F0", 
+                                   "#C2D69B"), 
+                        nm = c('Salmonellose',
+                               'Andere Ursache',
+                               'Nicht hospitalisiert'))
+
+# Define list of levels in hospital status data:
+hospindata <- linelist %>% 
+  
+  select(hosp_labels) %>% 
+  
+  mutate(hosp_labels = as.character(hosp_labels)) %>% 
+  
+  drop_na() %>% 
+  
+  pull() %>% 
+  
+  unique()
+
+# Trim hospcolours to levels in data:
+hospcolours <- subset(hospcolours, names(hospcolours) %in% hospindata)
+
+# Create boxplot:
+hosp_boxplot <- linelist %>% 
+  
+  select(hosp_labels, age_final) %>% 
+
+  drop_na() %>% 
+  
+  ggplot(mapping = aes(x = hosp_labels, 
+                       y = age_final)) +
+  
+  geom_boxplot(outlier.colour = "darkred", 
+               outlier.shape = 19,
+               outlier.size = 3, 
+               colour = "darkgrey", 
+               fill = hospcolours, 
+               drop = TRUE) +
+
+  stat_summary(fun.y = median, 
+               geom = "point", 
+               shape = 23, 
+               size = 4, 
+               colour = "darkgrey", 
+               fill = "white") +
+  
+  labs(x = "", 
+       y = "Alter (Jahre)\n") +
+  
+  theme_classic() +
+  
+  theme(axis.title = element_text(face = "bold", size = 10))
+  
+
+##########################  
+# Print boxplot:
+hosp_boxplot
+
+```
+
+<br>
+
+```{r severity_heatmap, tab.cap = "Hospitalisierungsstatus und Todesfälle nach Altersgruppe"}
+
+# Create raw hospitalisations table:
+hosptab <- linelist %>% 
+  
+  drop_na(hosp_final, age_cat) %>% 
+  
+  janitor::tabyl(hosp_final, age_cat) %>% 
+  
+  mutate(hosp_final = as.character(hosp_final)) %>% 
+  
+  mutate(hosp_final = case_when(
+    
+    hosp_final == "Hospitalisierung aufgrund der Salmonellose" 
+    ~ "Krankenhausaufenthalt \n(Salmonellose)", 
+    
+    hosp_final == "Hospitalisierung aufgrund anderer Ursachen" 
+    ~ "Krankenhausaufenthalt \n(andere Ursache)", 
+    
+    .default = hosp_final
+    
+  )) %>% 
+  
+  rename(Schweregrad = hosp_final)
+
+
+# Create raw death table:
+deathtab <- linelist %>% 
+  
+  drop_na(death_final, age_cat) %>% 
+  
+  janitor::tabyl(death_final, age_cat) %>% 
+  
+  mutate(death_final = as.character(death_final)) %>% 
+  
+  mutate(death_final = case_when(
+    
+    death_final == "Todesfälle aufgrund von Salmonellose" 
+    ~ "Gestorben \n(Salmonellose)", 
+    
+    death_final == "Todesfälle durch andere Ursachen" 
+    ~ "Gestorben \n(andere Ursache)",
+    
+    .default = death_final
+    
+  )) %>% 
+  
+  rename(Schweregrad = death_final) %>% 
+  
+  filter(Schweregrad != "Nicht gestorben")
+
+
+# Bind the two tables together:
+ageseveritytab <- bind_rows(hosptab, deathtab) 
+  
+
+# Convert to heatmap with custom function:
+ageseverityprint <- heatmaptable(ageseveritytab) %>% 
+  
+  # Add an extra header row with label for age categories:
+  add_header_row(values = c("", "Schweregrad", "Alterskategorien (Jahre)"), 
+                 colwidths = c(1, 1, nlevels(linelist$age_cat))) %>%
+  
+  # Merge the other parts of the header row:
+  merge_v(j = c(1:2), part = "header") %>% 
+  
+  # Make the column with the severity categories (2) bold:
+  bold(j = 2) %>% 
+  
+  # Reduce font size for better fit:
+  fontsize(size = 10, part = "all") %>% 
+  
+  # Set cell colours of row title column:
+  bg(i = 3, j = 2, bg = "#C2D69B", part = "body") %>% 
+  
+  bg(i = 2, j = 2, bg = "#00B0F0", part = "body") %>%
+  
+  bg(i = 1, j = 2, bg = "#002060", part = "body") %>%
+  
+  # Set font colours of row title column:
+  color(i = 1, j = 2, color = "white", part = "body") %>% 
+  
+  # Add internal horizontal borders to body:
+  hline(j = 2:(nlevels(linelist$age_cat) + 2), 
+        border = fp_border(), 
+        part = "body") %>% 
+
+  # Autofit to page:
+  set_table_properties(layout = "autofit")
+
+  
+#################
+# Print table:
+ageseverityprint
+
+
+```
+
+
+\pagebreak
+
+
+# Mikrobiologie
+
+`r ftext("[Fügen Sie hier Zahlen und Text zur Mikrobiologie hinzu.]", prop = placeholder)`
+
+
+\pagebreak
+
+
+# Internationaler Zusammenhang
+
+
+`r ftext("[Fügen Sie hier Informationen über den internationalen Kontext hinzu (falls relevant).]", prop = placeholder)`
+
+
+\pagebreak
+
+
+# Explorative Befragungen
+
+
+`r ftext("[Fügen Sie hier Informationen über Falluntersuchungen und explorative Befragungen hinzu.]", prop = placeholder)`
+
+
+\pagebreak
+
+
+# Ansprechpartner
+
+
+Dieser Lagebericht wurde von **`r params$author_name`** (`r params$author_affiliation`) verfasst. 
+
+Für weitere Informationen wenden Sie sich bitte an die unten aufgeführten Ansprechpartner.
+
+<br>
+
+```{r contacts_table}
+
+# Create a data.frame with the relevant information:
+contacts <- data.frame(
+  
+  detail = c("Name", 
+             "Abteilung",
+             "Fachgebiet",
+             "Adresse", 
+             "Telefon", 
+             "E-Mail"), 
+  
+  epi = c("Dr. Anika Meinen", 
+          "Infektionsepidemiologie",
+          "Gastrointestinale Infektionen, Zoonosen und tropische Infektionen", 
+          "Robert Koch-Institut\n\nSeestraße 10\n\n13353 Berlin", 
+          "030 18754 3663", 
+          "[FG35-Salm@rki.de](mailto:FG35-Salm@rki.de)"), 
+  
+  lab = c("Dr. Sandra Simon", 
+          "Infektionskrankheiten",
+          "Bakterielle darmpathogene Erreger und Legionellen und Nationales Referenzzentrum für Salmonellen und andere bakterielle Enteritiserreger",
+          "Robert Koch-Institut\n\nBurgstraße 37\n\n38855 Wernigerode", 
+          "030 18754 4211", 
+          "[NRZ-Salm-FG11@rki.de](mailto:NRZ-Salm-FG11@rki.de)")
+  
+) %>% 
+  
+  # Convert to flextable:
+  qflextable() %>% 
+  
+  # Allow markdown formatting to hyperlink email addresses:
+  ftExtra::colformat_md(.sep = "\n") %>% 
+  
+  # Remove all borders with a theme:
+  theme_booktabs() %>% 
+  
+  # Make column titles bold:
+  bold(part = "header") %>% 
+  
+  # Make details column bold:
+  bold(j = ~detail) %>% 
+  
+  # Align text to top of cell:
+  valign(valign = "top", part = "body") %>% 
+  
+  # Reduce line spacing:
+  line_spacing(i = ~ detail == "Adresse", 
+               space = 1, 
+               part = "body") %>% 
+  
+  # Update header labels:
+  set_header_labels(
+    detail = "", 
+    epi = "Ansprechpartner am FG35 RKI:", 
+    lab = "Ansprechpartner am NRZ:"
+  ) %>% 
+  
+  # Fit columns to text:
+  set_table_properties(layout = "autofit")
+
+
+# Print the table:
+contacts
+
+```
+
+<br>
+
+**Das nächste Update wird abhängig von der epidemiologischen Lage erscheinen.**
+
+```{r remove_temp_data, results='hide'}
+
+# Remove temporary example data if used:
+if (params$example_data) {
+  invisible(file.remove(tmp_current, tmp_previous))
+}
+
+
+```
+
