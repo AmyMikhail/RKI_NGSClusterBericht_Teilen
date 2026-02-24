@@ -119,6 +119,7 @@ pacman::p_load(
   here,           # Enables use of relative file paths
   rio,            # Functions to import data
   janitor,        # Autocleaning of column names and creation of simple tables
+  safer,          # Decryption of example data files
   
   # Summary tables:
   flextable,      # Creation of publication-quality editable tables
