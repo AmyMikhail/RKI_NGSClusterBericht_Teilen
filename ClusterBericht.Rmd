@@ -294,39 +294,6 @@ set_flextable_defaults(
 
 
 
-```{r locate_linelists}
-
-if (params$example_data) {
-  
-  # Create temporary file placeholder to hold raw bytes:
-  tmp_current <- tempfile(fileext = ".xlsx")
-  tmp_previous <- tempfile(fileext = ".xlsx")
-  
-  # Decrypt current line list file into raw byttes in R memory:
-  raw_current <- safer::decrypt_file(
-    infile = params$data_current, 
-    key = params$data_password,
-    outfile = tmp_current
-    )
-  
-  # Decrypt previous line list file into raw bytes in R memory:
-  raw_previous <- safer::decrypt_file(
-    infile = params$data_previous,
-    key = params$data_password,
-    outfile = tmp_previous
-    )
-
-} else {
-  
-  # Otherwise just pass the relative file paths to location names:
-  tmp_current <- params$data_current
-  tmp_previous <- params$data_previous
-  
-}
-
-
-```
-
 
 
 ```{r import_colour_codes}
@@ -632,6 +599,50 @@ kw_lookup <- rio::import(here("resources",
 ```
 
 
+```{r import_data_dictionary}
+
+#####################################################################
+# CREATE LOOKUP TABLE FOR SHORT VARIABLE NAMES
+
+# Import data dictionary / lookup table for shorter variable names:
+dictionary <- rio::import(here("resources", "Datenlexikon.csv")) 
+
+```
+
+
+```{r locate_linelists}
+
+if (params$example_data) {
+  
+  # Create temporary file placeholder to hold raw bytes:
+  tmp_current <- tempfile(fileext = ".xlsx")
+  tmp_previous <- tempfile(fileext = ".xlsx")
+  
+  # Decrypt current line list file into raw byttes in R memory:
+  raw_current <- safer::decrypt_file(
+    infile = params$data_current, 
+    key = params$data_password,
+    outfile = tmp_current
+    )
+  
+  # Decrypt previous line list file into raw bytes in R memory:
+  raw_previous <- safer::decrypt_file(
+    infile = params$data_previous,
+    key = params$data_password,
+    outfile = tmp_previous
+    )
+
+} else {
+  
+  # Otherwise just pass the relative file paths to location names:
+  tmp_current <- params$data_current
+  tmp_previous <- params$data_previous
+  
+}
+
+
+```
+
 
 ```{r import_outbreakname, eval = params$outbreak_declared}
 
@@ -712,15 +723,6 @@ cluster_decdate <- rio::import(tmp_current,
 ```
 
 
-```{r import_data_dictionary}
-
-#####################################################################
-# CREATE LOOKUP TABLE FOR SHORT VARIABLE NAMES
-
-# Import data dictionary / lookup table for shorter variable names:
-dictionary <- rio::import(here("resources", "Datenlexikon.csv")) 
-
-```
 
 
 ```{r import_linelist_current}
@@ -728,13 +730,13 @@ dictionary <- rio::import(here("resources", "Datenlexikon.csv"))
 #####################################################################
 # IMPORT AND CLEAN CURRENT LINELIST
 
-# Import raw linelist:
+# Import raw line list:
 linelist <- rio::import(tmp_current, 
                         sheet = "Linelist", 
                         skip = 5, 
                         .name_repair = "minimal") %>% 
   
-  # Clean the linelist with the function:
+  # Clean the line list with the function:
   clean_data()
 
 
