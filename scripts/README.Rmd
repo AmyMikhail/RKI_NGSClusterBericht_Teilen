@@ -286,6 +286,8 @@ This material is based on a template provided by the Robert Koch Institute.  [Ja
 To report problems (errors or bugs in the code or report output), please create a new [issue here](https://github.com/AmyMikhail/RKI_NGSClusterBericht_Teilen/issues). Copy the error from your R console, select the button on the issues dialogue box to format as code and paste it into the issue box.  Please also provide any additional descriptions about what went wrong in the issue text and make sure to label it as a `bug` before posting.
 
 You can also create a new issue to request new features or enhancements to the existing report (select `enhancement` or `documentation` labels as appropriate).
+
+You can read the [Changelog](CHANGELOG.md) for a history of previous issues, solutions and bug fixes.
  
 
 ### Maintenance:

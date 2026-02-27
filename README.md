@@ -480,6 +480,9 @@ You can also create a new issue to request new features or enhancements
 to the existing report (select `enhancement` or `documentation` labels
 as appropriate).
 
+You can read the [Changelog](CHANGELOG.md) for a history of previous
+issues, solutions and bug fixes.
+
 ### Maintenance:
 
 This project is currently being maintained by [Amy
