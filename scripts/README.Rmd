@@ -199,7 +199,7 @@ This report is currently provided as a parameterised R markdown report, which ca
 *=> Note:* Example data has been provided for demonstration and testing, however please note this is only available to authorised personnel (contact the repository maintainer to request access).
 
 
-![Fig. 1 - selecting knit with params...](../figures/knit_with_params.png)
+![Fig. 1 - selecting knit with params...](figures/knit_with_params.png)
 
 
 Currently you can choose from the following options:
@@ -223,7 +223,7 @@ Currently you can choose from the following options:
 Fisher-jenks breaks may not always be the most appropriate choice, which is why other options have been provided in the `map_breaks` parameter.  You can read more about the effects of different class interval methods on choropleth maps [here](https://data.europa.eu/apps/data-visualisation-guide/choropleth-classification-methods) and [here](https://storymaps.arcgis.com/stories/1200e9b359c341319bc8e4e4f3bcda30). 
 
 
-![Fig. 2 - select report parameters](../figures/select_params.png)
+![Fig. 2 - select report parameters](figures/select_params.png)
 
 
 
@@ -233,24 +233,24 @@ When you have completed your selections and edits, click on the `knit` button at
 
   1. The first error will tell you that the document can't be opened because of errors. Click `OK` in the dialogue box.
   
-  ![Fig. 3 - MS word document error on opening](../figures/word_error_m1.png)
+  ![Fig. 3 - MS word document error on opening](figures/word_error_m1.png)
   
   2. A second dialogue box will appear, saying that there is unreadable content in the document (this is the table of contents) and will ask you if you trust this content and want to recover it - click `Yes / Ja`.
   
-  ![Fig. 4 - MS word document unreadable content message](../figures/word_error_m2.png)
+  ![Fig. 4 - MS word document unreadable content message](figures/word_error_m2.png)
   
   3. The document should now open - navigate to the second page, where the table of contents should be under the title `Inhaltsverzeichnis`.
   4. The space where the table of contents should be appears empty, but on the left-hand side of the document page, you should be able to see the contents on the navigation bar.
   
-  ![Fig. 5 - MS word document TOC blank space](../figures/word_error_m3.png)
+  ![Fig. 5 - MS word document TOC blank space](figures/word_error_m3.png)
   
   5. Right-click with your mouse in the line below the TOC title: this should bring up a menu with the option to `!Update Field`.
   
-  ![Fig. 6 - MS word document Update Fields dialogue box](../figures/word_error_m4.png)
+  ![Fig. 6 - MS word document Update Fields dialogue box](figures/word_error_m4.png)
   
   6. Click on the `Update Field` option: the table of contents should now appear in the document. 
   
-  ![Fig. 7 - MS word document TOC fixed](../figures/word_error_m5.png)
+  ![Fig. 7 - MS word document TOC fixed](figures/word_error_m5.png)
   
   7. Save the document (a dialogue box will pop up allowing you to select a new location to save it in; choose a separate location outside the project folder as the reports should never be saved in a location accessible to GitHub)
   

@@ -268,7 +268,7 @@ testing, however please note this is only available to authorised
 personnel (contact the repository maintainer to request access).
 
 <figure>
-<img src="../figures/knit_with_params.png"
+<img src="figures/knit_with_params.png"
 alt="Fig. 1 - selecting knit with params…" />
 <figcaption aria-hidden="true">Fig. 1 - selecting knit with
 params…</figcaption>
@@ -334,7 +334,7 @@ and
 [here](https://storymaps.arcgis.com/stories/1200e9b359c341319bc8e4e4f3bcda30).
 
 <figure>
-<img src="../figures/select_params.png"
+<img src="figures/select_params.png"
 alt="Fig. 2 - select report parameters" />
 <figcaption aria-hidden="true">Fig. 2 - select report
 parameters</figcaption>
@@ -355,7 +355,7 @@ These are easily addressed by following the steps below:
     because of errors. Click `OK` in the dialogue box.
 
 <figure>
-<img src="../figures/word_error_m1.png"
+<img src="figures/word_error_m1.png"
 alt="Fig. 3 - MS word document error on opening" />
 <figcaption aria-hidden="true">Fig. 3 - MS word document error on
 opening</figcaption>
@@ -367,7 +367,7 @@ opening</figcaption>
     `Yes / Ja`.
 
 <figure>
-<img src="../figures/word_error_m2.png"
+<img src="figures/word_error_m2.png"
 alt="Fig. 4 - MS word document unreadable content message" />
 <figcaption aria-hidden="true">Fig. 4 - MS word document unreadable
 content message</figcaption>
@@ -381,7 +381,7 @@ content message</figcaption>
     see the contents on the navigation bar.
 
 <figure>
-<img src="../figures/word_error_m3.png"
+<img src="figures/word_error_m3.png"
 alt="Fig. 5 - MS word document TOC blank space" />
 <figcaption aria-hidden="true">Fig. 5 - MS word document TOC blank
 space</figcaption>
@@ -391,7 +391,7 @@ space</figcaption>
     should bring up a menu with the option to `!Update Field`.
 
 <figure>
-<img src="../figures/word_error_m4.png"
+<img src="figures/word_error_m4.png"
 alt="Fig. 6 - MS word document Update Fields dialogue box" />
 <figcaption aria-hidden="true">Fig. 6 - MS word document Update Fields
 dialogue box</figcaption>
@@ -401,7 +401,7 @@ dialogue box</figcaption>
     appear in the document.
 
 <figure>
-<img src="../figures/word_error_m5.png"
+<img src="figures/word_error_m5.png"
 alt="Fig. 7 - MS word document TOC fixed" />
 <figcaption aria-hidden="true">Fig. 7 - MS word document TOC
 fixed</figcaption>
