@@ -55,7 +55,7 @@ params:
     choices: [Bundesland, Falldefinition]
 output: 
   officedown::rdocx_document:
-    reference_docx: "resources/vorlagendokument.docx"
+    reference_docx: "../resources/vorlagendokument.docx"
     pandoc_args:
       - '--lua-filter=merge-code-blocks.lua'
     page_margins:
@@ -118,7 +118,8 @@ pacman::p_load(
   shiny,
   bookdown,
   officedown,
-  officer
+  officer,
+  here
 )
 
 # Add option to conditionally show text and evaluate inline expressions:
@@ -126,6 +127,8 @@ knit_engines$set(asis = function(options) {
   if (options$echo && options$eval) knit_child(text = options$code)
 })
 
+# Define location of this R markdown report relative to the project folder route:
+#here::i_am("scripts", "ClusterBericht.Rmd")
 
 ```
 
@@ -962,12 +965,15 @@ if(n_deaths_other == 1){
 ### 05. DEFINE REPORT TITLE CONDITIONALLY ON CLUSTER OR OUTBREAK:
 
 # Update report title to outbreak or cluster as defined by outbreak_declared:
-report_title <- ifelse(
-  params$outbreak_declared == TRUE, 
-  paste0('Zusammenfassender Bericht über  Salmonellenausbrüche:\n', 
-         outbreakname),  
-  paste0('Zusammenfassender Bericht über Salmonella NGS-Cluster:\n', 
-         clustername))
+if (params$outbreak_declared == TRUE) {
+  report_title <- paste0(
+    'Zusammenfassender Bericht über  Salmonellenausbrüche:\n',
+    outbreakname)
+} else {
+  report_title <- paste0(
+    'Zusammenfassender Bericht über Salmonella NGS-Cluster:\n',
+    clustername)
+}
 
 ```
 
@@ -2892,7 +2898,7 @@ contacts
 
 # Remove temporary example data if used:
 if (params$example_data) {
-  invisible(file.remove(tmp_current, tmp_previous))
+  file.remove(tmp_current, tmp_previous)
 }
 
 

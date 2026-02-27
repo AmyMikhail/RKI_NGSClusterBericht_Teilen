@@ -1,15 +1,14 @@
 NGS Cluster Bericht
 ================
-24 February 2026
+27 February 2026
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ### Background:
 
-This repository is for the development and maintenance of an R markdown
-script for generating automated *Salmonella enterica*
-Next-Generation-Sequencing (NGS) cluster situation reports for the
-Robert Koch Institute.
+This repository houses an R markdown script, functions and resources for
+generating automated *Salmonella enterica* Next-Generation-Sequencing
+(NGS) cluster situation reports for the Robert Koch Institute.
 
 ### Structure:
 
@@ -23,7 +22,8 @@ workbook.
 Supplementary files required to build the report are stored in the
 `resources` folder:
 
-- Data dictionary with column names and descriptions: `Datenlexikon.csv`
+- Data dictionary with column names, short names and descriptions:
+  `Datenlexikon.csv`
 - Microsoft word template with RKI styles and logo:
   `vorlagendokument.docx`
 - Serovar classification table: `Kauffman_White_classification.xlsx`
@@ -60,16 +60,55 @@ dictionary) file.
 
 *=\> Note:* Required variables that are essential to create this report
 are marked as `TRUE` in the `var_in_script` column of
-`Datenlexikon.xlsx`. If the name of any of these essential variables
-changes in the Microsoft Excel template, please update their names in
-the `varname_data` column of `Datenlexicon.xlsx` and save the edits
-before running the report. Be sure to replace any spaces and
-non-alphanumeric characters in the revised names with an underscore `_`.
+`Datenlexikon.xlsx`.
+
+If the name of any of these essential variables changes in the Microsoft
+Excel template, please update their names in the `varname_data` column
+of `Datenlexicon.xlsx` and save the edits before running the report. Be
+sure to replace any spaces and non-alphanumeric characters in the
+revised names with an underscore `_`.
+
 If you are not sure what the revised column name should look like after
-cleaning, run this in the RStudio console:
-`janitor::clean_names("revised col name (nonan)")` replacing ‘revised
-col name (nonan)’ with the actual new name of the column as it appears
-in the latest Microsoft excel line list template.
+cleaning, run this code on your line list (it will place a .csv file
+with cleaned column names in the resources folder - you can then copy
+the names from there to the relevant cells in `datenlexicon.xlsx`):
+
+``` r
+
+# Import your data:
+mydata <- rio::import(here::here("data", "my_linelist.xlsx"))
+
+# Clean column names:
+mydata <- mydata |>
+  janitor::clean_names()
+
+# Extract column names:
+my_clean_names <- mydata |>
+  names()
+
+# Format and export column names to a .csv (may be easier to copy to datenlexicon.xlsx):
+colnamesdf <- data.frame(colnames = my_clean_names) |>
+  rio::export(file = here::here("resources", "clean_col_names.csv"))
+```
+
+If you wish to use this report as is with another line list that has
+different column names (e.g. for a different pathogen) without modifying
+the R markdown template, just ensure that your data has equivalent
+columns for all the column names where `essential = TRUE` and replace
+the default cleaned column names in `datenlexicon.xlsx` with the cleaned
+column names from your line list (clean the column names as described
+above).
+
+Note that you will also have to provide the following global variables
+(just edit the relevant code chunks in the `ClusterBericht.Rmd` R
+markdown file to import them):
+
+- outbreak name (chunk: `import_outbreakname`)
+- report date or date latest data was received (chunk:
+  `import_reportdate`)
+- date of outbreak declaration, if declared (chunk:
+  `import_outbreakdate`)
+- date of WGS cluster notification (chunk: `import_clusterdate`)
 
 #### Source and updates for population files:
 
@@ -114,8 +153,8 @@ prepared in sf format as `.rds` files that could be directly imported
 into r with `rio::import()`. The projection used for these datasets is
 WGS84 and latitude/longitude.
 
-The shapefiles may need to be reviewed annually in case of any border
-changes.
+The shapefiles may need to be reviewed annually in case of any border or
+boundary changes.
 
 ### Creating a report
 
@@ -222,12 +261,14 @@ which can be run from RStudio by opening the `ClusterBericht.Rmd` file
 in the root of the `RKI_NGSClusterBericht` folder on your computer and
 selecting `Knit with parameters` from the knit menu. This will bring up
 a shiny app which you can use to select the options you would like to
-use to run the report. Example data has been provided for demonstration
-and testing, however please note this is only available to authorised
+use to run the report.
+
+*=\> Note:* Example data has been provided for demonstration and
+testing, however please note this is only available to authorised
 personnel (contact the repository maintainer to request access).
 
 <figure>
-<img src="figures/knit_with_params.png"
+<img src="../figures/knit_with_params.png"
 alt="Fig. 1 - selecting knit with params…" />
 <figcaption aria-hidden="true">Fig. 1 - selecting knit with
 params…</figcaption>
@@ -271,8 +312,29 @@ Currently you can choose from the following options:
   stratifier for the epicurve (defaults to federal states (Bundesland),
   other option is case definitions (Falldefinition))
 
+*=\> Note:* The class interval method selected for choropleth maps (how
+the data is grouped in the legend) will significantly affect how the
+maps look. The fisher-jenks natural breaks method (algorithm that
+defines natural breaks in the data) has been selected as the default,
+because it is more robust than the older Jenks implementation (which
+also uses natural breaks) when some regions in the map have no cases,
+and it runs faster when there is a large number of polygons (regions) on
+the map. Using natural breaks gives a more epidemiologically accurate
+picture of the geospatial distribution of the data. More information on
+fisher-jenks breaks, including a worked example showing how they are
+calculated is covered in [this
+article](https://www.ehdp.com/methods/jenks-natural-breaks-2.htm).
+
+Fisher-jenks breaks may not always be the most appropriate choice, which
+is why other options have been provided in the `map_breaks` parameter.
+You can read more about the effects of different class interval methods
+on choropleth maps
+[here](https://data.europa.eu/apps/data-visualisation-guide/choropleth-classification-methods)
+and
+[here](https://storymaps.arcgis.com/stories/1200e9b359c341319bc8e4e4f3bcda30).
+
 <figure>
-<img src="figures/select_params.png"
+<img src="../figures/select_params.png"
 alt="Fig. 2 - select report parameters" />
 <figcaption aria-hidden="true">Fig. 2 - select report
 parameters</figcaption>
@@ -280,37 +342,119 @@ parameters</figcaption>
 
 When you have completed your selections and edits, click on the `knit`
 button at the bottom of the Shiny app. This will generate the report,
-which will automatically open in Microsoft Word. Upon opening, you will
-see a message saying ‘Dieses Dokument enthält Felder, die auf andere
-Dateien verweisen können. Möchten Sie die Felder in diesem Dokument
-aktualisieren?’ Click `Ja` (yes) to ensure that the table of contents is
-included in the report.
+which will automatically open in Microsoft Word.
+
+*=\> Note:* Microsoft Word running on Windows 11 provides options to
+restrict automatic update of fields in the document, as a security
+measure. An unfortunate side effect of this, is that the table of
+contents generated by the R Markdown script does not automatically
+appear and you may see some errors when the word document first opens.
+These are easily addressed by following the steps below:
+
+1.  The first error will tell you that the document can’t be opened
+    because of errors. Click `OK` in the dialogue box.
 
 <figure>
-<img src="figures/insert_toc_message.png"
-alt="Fig. 3 - select yes to insert table of contents" />
-<figcaption aria-hidden="true">Fig. 3 - select yes to insert table of
-contents</figcaption>
+<img src="../figures/word_error_m1.png"
+alt="Fig. 3 - MS word document error on opening" />
+<figcaption aria-hidden="true">Fig. 3 - MS word document error on
+opening</figcaption>
 </figure>
 
-*=\> Note:* The generated report will be called `ClusterBericht.docx`.
-If you are satisfied with the generated report, change the file name
-(e.g. use the title of the current cluster or outbreak and today’s date)
-and move the file to another location on your computer. If this is not
-done, the next time the report is run, it will overwrite the previous
-one. Note that the report cannot be generated if a document of the same
-name is still open in Microsoft Word.
+2.  A second dialogue box will appear, saying that there is unreadable
+    content in the document (this is the table of contents) and will ask
+    you if you trust this content and want to recover it - click
+    `Yes / Ja`.
+
+<figure>
+<img src="../figures/word_error_m2.png"
+alt="Fig. 4 - MS word document unreadable content message" />
+<figcaption aria-hidden="true">Fig. 4 - MS word document unreadable
+content message</figcaption>
+</figure>
+
+3.  The document should now open - navigate to the second page, where
+    the table of contents should be under the title
+    `Inhaltsverzeichnis`.
+4.  The space where the table of contents should be appears empty, but
+    on the left-hand side of the document page, you should be able to
+    see the contents on the navigation bar.
+
+<figure>
+<img src="../figures/word_error_m3.png"
+alt="Fig. 5 - MS word document TOC blank space" />
+<figcaption aria-hidden="true">Fig. 5 - MS word document TOC blank
+space</figcaption>
+</figure>
+
+5.  Right-click with your mouse in the line below the TOC title: this
+    should bring up a menu with the option to `!Update Field`.
+
+<figure>
+<img src="../figures/word_error_m4.png"
+alt="Fig. 6 - MS word document Update Fields dialogue box" />
+<figcaption aria-hidden="true">Fig. 6 - MS word document Update Fields
+dialogue box</figcaption>
+</figure>
+
+6.  Click on the `Update Field` option: the table of contents should now
+    appear in the document.
+
+<figure>
+<img src="../figures/word_error_m5.png"
+alt="Fig. 7 - MS word document TOC fixed" />
+<figcaption aria-hidden="true">Fig. 7 - MS word document TOC
+fixed</figcaption>
+</figure>
+
+7.  Save the document (a dialogue box will pop up allowing you to select
+    a new location to save it in; choose a separate location outside the
+    project folder as the reports should never be saved in a location
+    accessible to GitHub)
+
+*=\> Note:* When saving the report, it is advisable to change the file
+name to something unique (e.g. use the title of the current cluster or
+outbreak and today’s date). This will prevent the report from being
+overwritten the next time it is run.
+
+*=\> Note:* The report cannot be generated if a document of the same
+name is still open in Microsoft Word: as a precaution make sure
+Microsoft Word is closed before running the R markdown document.
 
 ### Future enhancements:
 
-The following enhancements are planned in the near future:
+The code is currently organised as an R markdown document (main script
+that generates the report) with accompanying functions that are used to
+process or create the different elements in the report (R scripts in the
+functions folder). This format is the most accessible approach in case
+users would like to modify or adapt the code for cluster or outbreak
+data from sources other than the RKI Salmonella cluster linelist.
 
-- Creation of a more advanced Shiny app allowing selection of figure
-  options and preview of the results before knitting the report.
-- The project will be converted to an R package to ensure all dependent
-  packages are installed before the first report is run.
-- When these updates are applied, the instructions on this page will
-  also be updated.
+The following enhancements could be considered:
+
+1.  Column mapping could be added as parameters, as an alternative to
+    editing `Datenlexicon.xlsx`if using with data sets that have
+    different column names. This would require transition to a Shiny app
+    interface, which might also have other advantages (see below).
+
+2.  The user interface to generate the report could be converted to a
+    full Shiny app (instead of the limited Shiny app automatically
+    generated when you press the `Knit with parameters`button in
+    RStudio). This would allow for features such as image previews
+    (helpful when deciding on which class interval methods to use for
+    maps, or on which stratifier to use for epicurves).
+
+3.  The code could also be bundled into an R package, which might make
+    the set-up easier (especially for users that are not familiar with
+    Git). In this format, required packages would automatically be
+    installed as dependencies and a `Generate report`function would
+    launch the Shiny app for the user to select the report parameters.
+
+4.  Another future enhancement could be to convert the R markdown
+    document to Quarto. At the time of writing, there is no particular
+    advantage in doing this, since R markdown is still supported, and
+    the script only contains R code (Quarto can be useful for scripts
+    that also contain other computer languages, like Python or SQL).
 
 ### Acknowledgements:
 
@@ -327,9 +471,10 @@ the code.
 To report problems (errors or bugs in the code or report output), please
 create a new [issue
 here](https://github.com/AmyMikhail/RKI_NGSClusterBericht_Teilen/issues).
-Copy the error from your R console and paste it into the issue box.
-Please also provide any additional descriptions about what went wrong in
-the issue text and make sure to label it as a `bug` before posting.
+Copy the error from your R console, select the button on the issues
+dialogue box to format as code and paste it into the issue box. Please
+also provide any additional descriptions about what went wrong in the
+issue text and make sure to label it as a `bug` before posting.
 
 You can also create a new issue to request new features or enhancements
 to the existing report (select `enhancement` or `documentation` labels
